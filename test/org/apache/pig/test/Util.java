@@ -697,6 +697,15 @@ public class Util {
         }
         PigServer ps = new PigServer(cluster.getExecType(), cluster.getProperties());
         String script = getFSMkDirCommand(fileNameOnCluster) + "fs -put " + localFileName + " " + fileNameOnCluster;
+        // In MR1, "hadoop fs -mkdir" does not automatically create the home
+        // directory, so we explicitly have to create it first. Note that this
+        // is a CDH-specific change since the upstream Hadoop 1.x and 2.x do
+        // not have this issue.
+        FileSystem fs = cluster.getFileSystem();
+        Path homeDir = fs.getHomeDirectory();
+        if (!fs.exists(homeDir)) {
+            fs.mkdirs(homeDir);
+        }
         GruntParser parser = new GruntParser(new StringReader(script), ps);
         parser.setInteractive(false);
         try {
