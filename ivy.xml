@@ -106,6 +106,12 @@
       conf="hadoop2->master"/>
     <dependency org="com.google.inject.extensions" name="guice-servlet" rev="${guice-servlet.version}"
       conf="hadoop2->master"/>
+    <dependency org="javax.inject" name="javax.inject" rev="${javax.inject.version}"
+      conf="hadoop2->master"/>
+    <dependency org="javax.xml.bind" name="jaxb-api" rev="${jaxb.api.version}"
+      conf="hadoop2->master"/>
+    <dependency org="com.sun.xml.bind" name="jaxb-impl" rev="${jaxb.impl.version}"
+      conf="hadoop2->master"/>
     <dependency org="aopalliance" name="aopalliance" rev="${aopalliance.version}"
       conf="hadoop2->master"/>
     <dependency org="org.mortbay.jetty" name="jsp-2.1" rev="${jasper.version}"
@@ -115,68 +121,171 @@
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
       conf="compile->master"/>
     <dependency org="org.apache.hadoop" name="hadoop-annotations"
-      rev="${hadoop-common.version}" conf="hadoop2->master"/>
+      rev="${hadoop-common.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-auth" 
-      rev="${hadoop-common.version}" conf="hadoop2->master"/>
-    <dependency org="org.apache.hadoop" name="hadoop-common" 
+      rev="${hadoop-common.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
+    <dependency org="org.apache.hadoop" name="hadoop-common"
       rev="${hadoop-common.version}" conf="hadoop2->master">
       <artifact name="hadoop-common" ext="jar" />
       <artifact name="hadoop-common" type="tests" ext="jar" m:classifier="tests" />
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop-hdfs.version}" conf="hadoop2->master">
       <artifact name="hadoop-hdfs" ext="jar" />
       <artifact name="hadoop-hdfs" type="tests" ext="jar" m:classifier="tests" />
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core" rev="${hadoop-mapreduce.version}"
-      conf="hadoop2->master"/>
+      conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-jobclient" rev="${hadoop-mapreduce.version}"
       conf="hadoop2->master">
-        <artifact name="hadoop-mapreduce-client-jobclient" ext="jar" />
-        <artifact name="hadoop-mapreduce-client-jobclient" type="tests" ext="jar" m:classifier="tests"/>
-        <exclude org="commons-daemon" module="commons-daemon"/><!--bad POM-->
-        <exclude org="org.apache.commons" module="commons-daemon"/><!--bad POM-->
+      <artifact name="hadoop-mapreduce-client-jobclient" ext="jar" />
+      <artifact name="hadoop-mapreduce-client-jobclient" type="tests" ext="jar" m:classifier="tests"/>
+      <exclude org="commons-daemon" module="commons-daemon"/><!--bad POM-->
+      <exclude org="org.apache.commons" module="commons-daemon"/><!--bad POM-->
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server-tests" rev="${hadoop-mapreduce.version}"
       conf="hadoop2->master">
       <artifact name="hadoop-yarn-server-tests" type="jar" m:classifier="tests"/>
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-app" rev="${hadoop-mapreduce.version}"
-      conf="hadoop2->master" />
+      conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-shuffle" rev="${hadoop-mapreduce.version}"
-      conf="hadoop2->master" />
+      conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-common" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-api" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-common" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server-web-proxy" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server-common" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server-nodemanager" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server-resourcemanager" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-client" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
-    <dependency org="org.apache.hadoop" name="hadoop-yarn-server-applicationhistoryservice" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
+    <dependency org="org.apache.hadoop" name="hadoop-yarn-server-applicationhistoryservice"
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-hs" 
-      rev="${hadoop-mapreduce.version}" conf="hadoop2->master"/>
+      rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12" />
+    </dependency>
     <dependency org="org.mortbay.jetty" name="jetty" rev="${jetty.version}"
       conf="compile->master">
       <artifact name="jetty" ext="jar" />
     </dependency>
     <dependency org="org.mortbay.jetty" name="jetty-util" rev="${jetty.version}"
       conf="compile->master"/>
+    <dependency org="org.mortbay.jetty" name="jsp-api-2.1" rev="${jetty-jsp.version}"
+      conf="compile->master"/>
+    <dependency org="org.mortbay.jetty" name="jsp-2.1" rev="${jetty-jsp.version}"
+      conf="compile->master"/>
+    <dependency org="org.mortbay.jetty" name="servlet-api-2.5" rev="${jetty-jsp.version}"
+      conf="compile->master"/>
     <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}"
       conf="compile->master;checkstyle->master"/>
     <dependency org="org.slf4j" name="slf4j-log4j12" rev="${slf4j-log4j12.version}"
       conf="compile->master;test->master"/>
+
     <dependency org="commons-cli" name="commons-cli" rev="${commons-cli.version}"
       conf="compile->master;checkstyle->master"/>
     <dependency org="org.apache.avro" name="avro" rev="${avro.version}"
@@ -326,6 +435,7 @@
       <exclude org="com.sun.jersey" module="jersey-server"/>
       <exclude org="com.sun.jersey" module="jersey-json"/>
       <exclude org="asm" module="asm"/>
+      <exclude org="org.mortbay.jetty" module="*" />
     </dependency>
 
     <dependency org="org.htrace" name="htrace-core" rev="3.0.4" conf="hadoop2->master"/>

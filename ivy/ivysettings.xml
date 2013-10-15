@@ -42,12 +42,22 @@
   <include url="${ivy.default.conf.dir}/ivyconf-local.xml"/>
   <settings defaultResolver="${resolvers}"/>
   <resolvers>
+    <!-- CDH build repo, the pattern attribute handles SNAPSHOT artifacts -->
+    <ibiblio name="reactor-repo" root="${reactor.repo}"
+             m2compatible="true"
+             checkmodified="true"/>
     <ibiblio name="maven2" root="${repo.maven.org}" pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="jboss-maven2" root="${repo.jboss.org}" pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="apache-snapshots" root="${repo.apache.snapshots}" pattern="${snapshot.pattern}"
          checkmodified="true" changingPattern=".*SNAPSHOT" m2compatible="true"/>
+    <ibiblio name="apache-snapshot" root="${snapshot.apache.org}" pattern="${maven2.pattern.ext}" m2compatible="true"/>
+    <ibiblio name="cloudera-releases" m2compatible="true" pattern="${maven2.pattern.ext}"
+      root="https://repository.cloudera.com/content/groups/cdh-releases-rcs" checkmodified="true"/>
+    <ibiblio name="cloudera-snapshots" m2compatible="true" pattern="${maven2.pattern.ext}"
+      root="https://repository.cloudera.com/content/repositories/snapshots" checkmodified="true"/>
     <filesystem name="fs" m2compatible="true" checkconsistency="false" force="${force-resolve}"
          checkmodified="true" changingPattern=".*SNAPSHOT">
+
       <artifact pattern="${repo.dir}/${maven2.pattern.ext}"/>
       <ivy pattern="${repo.dir}/[organisation]/[module]/[revision]/[module]-[revision].pom"/>
     </filesystem>
@@ -55,16 +65,32 @@
       <resolver ref="fs"/>
     </chain>
     <chain name="external" dual="true">
+      <resolver ref="reactor-repo"/>
+      <resolver ref="local"/>
       <resolver ref="maven2"/>
       <resolver ref="jboss-maven2"/>
       <resolver ref="apache-snapshots"/>
+      <resolver ref="cloudera-releases"/>
     </chain>
     <chain name="default" dual="true" checkmodified="true">
       <resolver ref="internal"/>
       <resolver ref="external"/>
     </chain>
+    <chain name="external-and-snapshots">
+      <resolver ref="maven2"/>
+      <resolver ref="apache-snapshot"/>
+    </chain>
+    <chain name="cloudera">
+      <resolver ref="reactor-repo" />
+      <resolver ref="cloudera-releases" />
+      <resolver ref="cloudera-snapshots" />
+    </chain>
   </resolvers>
   <modules>
     <module organisation="org.apache.pig" name=".*" resolver="internal"/>
+    <module organisation="com.cloudera.*" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.hadoop" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.hbase" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.zookeeper" name=".*" resolver="cloudera" />
   </modules>
 </ivysettings>

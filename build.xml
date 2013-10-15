@@ -27,6 +27,25 @@
         </classpath>
     </taskdef>
 
+    <!-- Initializes ivy/libraries.properties and build.properties with CDH versions -->
+    <if>
+        <and>
+            <not>
+                <isset property="cdh.maven" />
+            </not>
+            <not>
+                <available file="${basedir}/build.properties" />
+            </not>
+        </and>
+        <then>
+            <exec  executable="mvn" dir="${basedir}" failonerror="true">
+                <arg value="-f" />
+                <arg value="cloudera-pom.xml" />
+                <arg value="process-resources"/>
+            </exec>
+        </then>
+    </if>
+
     <property file="${user.home}/build.properties" />
     <property file="${basedir}/build.properties" />
 
@@ -38,7 +57,7 @@
     <property name="pigsmoke.pom" value="${basedir}/ivy/pigsmoke.pom" />
     <property name="pigunit.pom" value="${basedir}/ivy/pigunit.pom" />
     <property name="piggybank.pom" value="${basedir}/ivy/piggybank.pom" />
-    <property name="pig.version" value="0.17.0" />
+    <property name="pig.version" value="0.17.0-cdh6.x" />
     <property name="pig.version.suffix" value="-SNAPSHOT" />
     <property name="version" value="${pig.version}${pig.version.suffix}" />
     <property name="final.name" value="${name}-${version}" />
@@ -153,7 +172,7 @@
     <condition property="isWindows">
       <os family="windows"/>
     </condition>
-	
+
     <target name="setTezEnv">
         <propertyreset name="test.timeout" value="900000" />
         <propertyreset name="hadoopversion" value="2" />
@@ -307,6 +326,22 @@
         <available file="${build.dir}/lib/ant-eclipse-1.0-jvm1.2.jar"/>
     </condition>
 
+    <!-- JVM version validation -->
+    <target name="jvm-check">
+        <property name="javaVersion" value="1.7"/>
+
+        <property name="requiredJavaVersion" value="xx${javaVersion}"/>
+        <property name="currentJavaVersion" value="xx${java.version}"/>
+        <condition property="jvm.fail">
+            <not>
+                <contains string="${currentJavaVersion}" substring="${requiredJavaVersion}"/>
+            </not>
+        </condition>
+        <fail if="jvm.fail">
+            Incorrect JVM, current = ${java.version}, required ${javaVersion}.
+        </fail>
+    </target>
+
     <target name="ant-eclipse-download" unless="ant-eclipse.jar.exists"
             description="Downloads the ant-eclipse binary.">
         <get src="http://downloads.sourceforge.net/project/ant-eclipse/ant-eclipse/1.0/ant-eclipse-1.0.bin.tar.bz2"
@@ -374,10 +409,9 @@
 
     <path id="test.classpath">
         <!-- need to put this first, otherwise junit-3 testcases can break -->
-        <pathelement location="${ivy.lib.dir}/junit-3.8.1.jar"/>
         <pathelement location="${build.classes}"/>
         <pathelement location="${test.src.dir}"/>
-        <pathelement location="${piggybank.jarfile}"/>
+        <pathelement location="contrib/piggybank/java/piggybank.jar"/>
         <path refid="classpath"/>
     </path>
 
@@ -740,7 +774,7 @@
             <fileset dir="${ivy.lib.dir.spark}" includes="*.jar"/>
         </copy>
     </target>
-    
+
     <target name="copyh2Dependencies" if="isHadoop2">
         <mkdir dir="${lib.dir}/h2" />
         <copy todir="${lib.dir}/h2">
@@ -893,6 +927,15 @@
     <target name="debugger.unset" unless="debugPort">
         <property name="debugArgs" value=""/>
     </target>
+
+    <path id="junit.test.classpath">
+        <pathelement location="${output.jarfile.withouthadoop}" />
+        <pathelement location="${test.build.classes}" />
+        <pathelement location="${junit.hadoop.conf}" />
+        <pathelement location="." />
+        <pathelement path="${clover.jar}"/>
+        <path refid="test.classpath"/>
+    </path>
 
     <macrodef name="macro-test-runner">
       <attribute name="test.file" />
@@ -1056,11 +1099,82 @@
     <!-- ================================================================== -->
     <!-- Distribution                                                       -->
     <!-- ================================================================== -->
+    <target name="package-release" depends="docs, api-report" description="Create a Pig release for rpm/deb distribution">
+        <mkdir dir="${rpm.dist.dir}" />
+        <mkdir dir="${rpm.dist.dir}/etc/pig" />
+        <mkdir dir="${rpm.dist.dir}/share/pig/scripts" />
+        <mkdir dir="${rpm.dist.dir}/share/pig/templates/conf" />
+        <mkdir dir="${rpm.dist.dir}/share/pig/lib" />
+        <mkdir dir="${rpm.dist.dir}/share/doc/pig" />
+        <mkdir dir="${rpm.dist.dir}/share/doc/pig/api" />
+        <mkdir dir="${rpm.dist.dir}/share/doc/pig/jdiff"/>
+        <mkdir dir="${rpm.dist.dir}/share/doc/pig/license" />
+        <copy todir="${rpm.dist.dir}/cloudera">
+            <fileset dir="cloudera" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/pig/lib">
+            <fileset dir="${ivy.lib.dir}" includes="jython*.jar"/>
+        </copy>
+
+        <copy file="${output.jarfile.backcompat.withouthadoop}" tofile="${rpm.dist.dir}/share/pig/${final.name}-withouthadoop.jar" />
+
+        <copy todir="${rpm.dist.dir}/bin">
+            <fileset dir="bin" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/doc/pig">
+            <fileset dir="${build.docs}" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/etc/pig" file="conf/pig.properties"/>
+
+        <copy todir="${rpm.dist.dir}/etc/pig" file="conf/log4j.properties.template"/>
+
+        <copy todir="${rpm.dist.dir}/share/pig/test" includeEmptyDirs="true">
+            <fileset dir="${test.src.dir}" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/pig/tutorial" includeEmptyDirs="true">
+            <fileset dir="tutorial" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/pig/contrib" includeEmptyDirs="true">
+            <fileset dir="contrib" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/doc/pig">
+            <fileset dir=".">
+                <include name="*.txt" />
+            </fileset>
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/doc/pig/license">
+            <fileset dir="license" />
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/share/pig/templates/conf">
+            <fileset dir="src/packages/templates/conf"/>
+        </copy>
+
+        <copy todir="${rpm.dist.dir}/sbin">
+            <fileset dir="src/packages">
+                <include name="*.sh"/>
+            </fileset>
+        </copy>
+
+        <chmod perm="ugo+x" type="file">
+            <fileset dir="${rpm.dist.dir}/bin" />
+            <fileset dir="${rpm.dist.dir}/sbin" />
+        </chmod>
+
+    </target>
+
 
     <target name="package" depends="jar, docs, api-report, piggybank" description="Create a Pig tar release">
         <package-base/>
     </target>
-	
+
     <macrodef name="package-base">
       <sequential>
         <mkdir dir="${tar.dist.dir}" />
@@ -1071,6 +1185,9 @@
         <mkdir dir="${tar.dist.dir}/docs/api" />
         <mkdir dir="${tar.dist.dir}/docs/jdiff"/>
         <mkdir dir="${tar.dist.dir}/license" />
+        <copy todir="${tar.dist.dir}/cloudera">
+            <fileset dir="cloudera" />
+        </copy>
 
         <copy todir="${tar.dist.dir}/lib" includeEmptyDirs="false">
             <fileset dir="${lib.dir}"/>
@@ -1081,6 +1198,8 @@
         <copy todir="${tar.dist.dir}/lib" file="contrib/piggybank/java/piggybank.jar"/>
 
         <copy todir="${tar.dist.dir}/" file="ivy.xml" />
+        <copy todir="${tar.dist.dir}/" file="cloudera-pom.xml" />
+        <copy todir="${tar.dist.dir}/" file="build.properties" />
 
         <copy todir="${tar.dist.dir}/ivy">
             <fileset dir="ivy" />
@@ -1239,42 +1358,10 @@
           uri="urn:maven-artifact-ant"
           classpathref="mvn-ant-task.classpath"/>
     </target>
-    <target name="mvn-install" depends="mvn-taskdef, mvn-build, set-version"
-         description="To install pig to local filesystem's m2 cache">
-         <artifact:pom file="${pig.pom}" id="pig"/>
-          <artifact:install file="${output.jarfile.core-h2}">
-               <pom refid="pig"/>
-           <attach file="${output.jarfile.sources}" classifier="sources" />
-           <attach file="${output.jarfile.javadoc}" classifier="javadoc" />
-          </artifact:install>
-         <artifact:pom file="${pigunit.pom}" id="pigunit"/>
-          <artifact:install file="${pigunit.jarfile}">
-               <pom refid="pigunit"/>
-           </artifact:install>
-         <artifact:pom file="${pigsmoke.pom}" id="pigsmoke"/>
-          <artifact:install file="${smoke.tests.jarfile}">
-               <pom refid="pigsmoke"/>
-         </artifact:install>
-         <artifact:pom file="${piggybank.pom}" id="piggybank"/>
-         <artifact:install file="${piggybank.jarfile}">
-               <pom refid="piggybank"/>
-         </artifact:install>
-    </target>
 
-    <target name="mvn-build" depends="jar, source-jar,
-                                      javadoc-jar, smoketests-jar, pigunit-jar, piggybank"
-         description="To build the pig jar artifacts to be deployed to apache maven repository">
-        <move file="${output.jarfile.backcompat-core-h2}" tofile="${output.jarfile.core-h2}"/>
-    </target>
-
-    <!-- Expects that mvn-build has already been run but does not run it. In some cases building
-    might happen on one host and signing/uploading on another. Hence the decoupled tasks. -->
-    <target name="mvn-publish" depends="mvn-taskdef, set-version, signanddeploy, simpledeploy"
-        description="To publish the pig jar artifacts to the apache maven repository">
-    </target>
-
-    <target name="mvn-deploy" depends="mvn-build, mvn-publish"
-         description="To build and upload pig jar to apache maven repository">
+    <target name="mvn-install"
+            description="To install pig to local filesystem's m2 cache">
+        <echo>To install Cloudera pig jar into Maven cache, run "mvn -f cloudera-pom.xml install -Dmvnrepo=${mvnrepo}" from this directory.</echo>
     </target>
 
     <target name="signanddeploy" if="staging" depends="sign">
@@ -1674,7 +1761,7 @@
      </target>
 
      <target name="ivy-releaseaudit" depends="ivy-resolve" description="Retrieve Ivy-managed artifacts for releaseaudit configuration">
-        <ivy:retrieve settingsRef="${ant.project.name}.ivy.settings" log="${loglevel}"  
+        <ivy:retrieve settingsRef="${ant.project.name}.ivy.settings" log="${loglevel}"
                  pattern="${build.ivy.lib.dir}/${ivy.artifact.retrieve.pattern}" conf="releaseaudit"/>
        <ivy:cachepath pathid="releaseaudit.classpath" conf="releaseaudit"/>
      </target>
@@ -1712,7 +1799,19 @@
         <delete file="${jackson_mapper.jar}"/>
      </target>
 
-     <target name="ready-to-publish" depends="jar, ivy-resolve"/>
+     <target name="assert-pig-jar-exists" depends="ivy-init">
+         <fail>
+             <condition >
+                 <not>
+                     <available file="${output.jarfile.withdependencies}" />
+                 </not>
+             </condition>
+             Not found: ${output.jarfile.withdependencies}
+             Please run the target "jar" in the main build file
+         </fail>
+     </target>
+
+     <target name="ready-to-publish" depends="jar, assert-pig-jar-exists, ivy-resolve"/>
 
      <target name="ivy-publish-local" depends="ready-to-publish,ivy-resolve">
         <ivy:publish settingsRef="${ant.project.name}.ivy.settings"
