@@ -61,6 +61,7 @@ import org.apache.hadoop.mapred.JobPriority;
 import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.hadoop.mapred.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
+import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.pig.ComparisonFunc;
 import org.apache.pig.ExecType;
 import org.apache.pig.FuncSpec;
@@ -330,7 +331,7 @@ public class JobControlCompiler{
 
                 Job job = getJob(plan, mro, conf, pigContext);
                 jobMroMap.put(job, mro);
-                jobCtrl.addJob(job);
+                jobCtrl.addJob((ControlledJob)job);
             }
         } catch (JobCreationException jce) {
             throw jce;
