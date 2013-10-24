@@ -177,7 +177,7 @@ public abstract class Launcher {
             String exceptionCreateFailMsg = null;
             boolean jobFailed = false;
             if (msgs.length > 0) {
-                if (report.getCurrentStatus()== TIPStatus.FAILED) {
+                if (report.getCurrentStatus() == TIPStatus.FAILED || report.getCurrentStatus()==TIPStatus.KILLED) {
                     jobFailed = true;
                 }
                 Set<String> errorMessageSet = new HashSet<String>();
