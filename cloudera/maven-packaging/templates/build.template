@@ -14,3 +14,4 @@ hadoop-mapreduce.version=org.apache.hadoop:hadoop-mapreduce.version
 protobuf-java.version=com.google.protobuf:protobuf-java.version
 slf4j-api.version=org.slf4j:slf4j-api.version
 slf4j-log4j12.version=org.slf4j:slf4j-log4j12.version
+parquet-pig-bundle.version=com.twitter:parquet-pig.version
