@@ -20,6 +20,7 @@ package org.apache.pig.newplan;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -33,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.util.Pair;
 
-public abstract class BaseOperatorPlan implements OperatorPlan {
+public abstract class BaseOperatorPlan implements OperatorPlan, Serializable {
 
     protected List<Operator> ops;
     protected PlanEdge fromEdges;
@@ -486,7 +487,7 @@ public abstract class BaseOperatorPlan implements OperatorPlan {
      * be moved and will be the root of the new operator plan
      * @param root Operator to move everything after
      * @param newPlan new operator plan to move things into
-     * @throws PlanException 
+     * @throws PlanException
      */
     public void moveTree(Operator root, BaseOperatorPlan newPlan) throws FrontendException {
         Deque<Operator> queue = new ArrayDeque<Operator>();
@@ -509,12 +510,12 @@ public abstract class BaseOperatorPlan implements OperatorPlan {
 
         trimBelow(root);
     }
-    
+
     /**
      * Trim everything below a given operator.  The specified operator will
      * NOT be removed.
      * @param op Operator to trim everything after.
-     * @throws FrontendException 
+     * @throws FrontendException
      */
     public void trimBelow(Operator op) throws FrontendException {
         if (getSuccessors(op) != null) {

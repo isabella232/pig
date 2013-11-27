@@ -18,19 +18,20 @@
 
 package org.apache.pig.newplan;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.parser.SourceLocation;
 
-public abstract class Operator {
+public abstract class Operator implements Serializable {
     protected SourceLocation location; // The location of the operator in the original pig script.
     
     protected String name;
     protected OperatorPlan plan; // plan that contains this operator
-    protected Map<String, Object> annotations;
-    protected final int hashPrime = 31;
+    protected transient Map<String, Object> annotations;
+    protected transient final int hashPrime = 31;
 
     public Operator(String n, OperatorPlan p) {
         name = n;

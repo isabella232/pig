@@ -87,6 +87,7 @@ public abstract class HExecutionEngine implements ExecutionEngine {
     // val: the operator key for the root of the phyisical plan
     protected Map<OperatorKey, OperatorKey> logicalToPhysicalKeys;
     protected Map<Operator, PhysicalOperator> newLogToPhyMap;
+    private LogicalPlan newLogicalPlan;
 
     public HExecutionEngine(PigContext pigContext) {
         this.pigContext = pigContext;
@@ -239,6 +240,8 @@ public abstract class HExecutionEngine implements ExecutionEngine {
             throw new FrontendException(msg, errCode, PigException.BUG);
         }
 
+        newLogicalPlan = plan;
+
         // translate new logical plan to physical plan
         LogToPhyTranslationVisitor translator = new LogToPhyTranslationVisitor(plan);
 
@@ -334,6 +337,10 @@ public abstract class HExecutionEngine implements ExecutionEngine {
                 eps.close();
             }
         }
+    }
+
+    public LogicalPlan getLogicalPlan(){
+        return this.newLogicalPlan;
     }
 
     @Override

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.io.ByteArrayOutputStream;
 
 import org.apache.pig.PigConstants;
 import org.apache.pig.PigException;
@@ -64,6 +65,10 @@ import org.apache.pig.validator.BlackAndWhitelistValidator;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 
 /**
@@ -157,16 +162,23 @@ public class LogicalPlan extends BaseOperatorPlan {
      * @throws FrontendException if signature can't be computed
      */
     public String getSignature() throws FrontendException {
+        String logicalPlanString = getLogicalPlanString();
+        return Integer.toString(logicalPlanString.hashCode());
+    }
 
-        // Use a streaming hash function. We use a murmur_32 function with a constant seed, 0.
-        HashFunction hf = Hashing.murmur3_32(0);
-        HashOutputStream hos = new HashOutputStream(hf);
-        PrintStream ps = new PrintStream(hos);
+    public String getHash() throws FrontendException {
+        HashFunction hf = Hashing.md5();
+        Hasher h = hf.newHasher();
+        h.putString(getLogicalPlanString());
+        return h.hash().toString();
+    }
 
+    private String getLogicalPlanString() throws FrontendException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
         LogicalPlanPrinter printer = new LogicalPlanPrinter(this, ps);
         printer.visit();
-
-        return Integer.toString(hos.getHashCode().asInt());
+        return baos.toString();
     }
 
     public void validate(PigContext pigContext, String scope, boolean skipInputOutputValidation)
@@ -226,7 +238,7 @@ public class LogicalPlan extends BaseOperatorPlan {
                 true /* skip duplicate uid check*/);
         schemaResetter.visit();
     }
-    
+
     public void optimize(PigContext pigContext) throws FrontendException {
         if (pigContext.inIllustrator) {
             // disable all PO-specific optimizations

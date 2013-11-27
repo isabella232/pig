@@ -64,6 +64,7 @@ import org.apache.pig.impl.plan.OperatorPlan;
 import org.apache.pig.impl.plan.VisitorException;
 import org.apache.pig.impl.util.JarManager;
 import org.apache.pig.impl.util.ObjectSerializer;
+import org.apache.pig.newplan.Operator;
 import org.apache.pig.newplan.logical.relational.LOCogroup;
 import org.apache.pig.newplan.logical.relational.LOCogroup.GROUPTYPE;
 import org.apache.pig.newplan.logical.relational.LOCross;
@@ -82,6 +83,9 @@ import org.apache.pig.newplan.logical.relational.LOUnion;
 import org.apache.pig.newplan.logical.relational.LogicalPlan;
 import org.apache.pig.newplan.logical.relational.LogicalRelationalNodesVisitor;
 import org.apache.pig.tools.pigstats.mapreduce.MRScriptState;
+import org.apache.pig.tools.pigstats.PigStats.JobGraph;
+import org.apache.pig.newplan.logical.relational.LOCogroup.GROUPTYPE;
+import org.apache.pig.newplan.logical.relational.LOJoin.JOINTYPE;
 
 import com.google.common.collect.Lists;
 
@@ -98,19 +102,22 @@ public abstract class ScriptState {
      * Keys of Pig settings added to Jobs
      */
     protected enum PIG_PROPERTY {
-        SCRIPT_ID("pig.script.id"),
-        SCRIPT("pig.script"),
-        COMMAND_LINE("pig.command.line"),
-        HADOOP_VERSION("pig.hadoop.version"),
-        VERSION("pig.version"),
-        INPUT_DIRS("pig.input.dirs"),
-        MAP_OUTPUT_DIRS("pig.map.output.dirs"),
-        REDUCE_OUTPUT_DIRS("pig.reduce.output.dirs"),
-        JOB_PARENTS("pig.parent.jobid"),
-        JOB_FEATURE("pig.job.feature"),
-        SCRIPT_FEATURES("pig.script.features"),
-        JOB_ALIAS("pig.alias"),
-        JOB_ALIAS_LOCATION("pig.alias.location");
+        SCRIPT_ID           ("pig.script.id"),
+        SCRIPT              ("pig.script"),
+        COMMAND_LINE        ("pig.command.line"),
+        HADOOP_VERSION      ("pig.hadoop.version"),
+        VERSION             ("pig.version"),
+        INPUT_DIRS          ("pig.input.dirs"),
+        MAP_OUTPUT_DIRS     ("pig.map.output.dirs"),
+        REDUCE_OUTPUT_DIRS  ("pig.reduce.output.dirs"),
+        JOB_PARENTS         ("pig.parent.jobid"),
+        JOB_FEATURE         ("pig.job.feature"),
+        SCRIPT_FEATURES     ("pig.script.features"),
+        JOB_ALIAS           ("pig.alias"),
+        JOB_ALIAS_LOCATION  ("pig.alias.location"),
+        ENABLE_PLAN_SERIALIZATION("pig.enable.plan.serialization"),
+        LOGICAL_PLAN        ("pig.logicalPlan"),
+        LOGICAL_PLAN_HASH   ("pig.logicalPlan.hash");
 
         private String displayStr;
 

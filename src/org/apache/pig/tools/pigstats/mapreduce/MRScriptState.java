@@ -17,6 +17,7 @@
  */
 package org.apache.pig.tools.pigstats.mapreduce;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -30,13 +31,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.pig.LoadFunc;
+import org.apache.pig.backend.hadoop.executionengine.HExecutionEngine;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.NativeMapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POLoad;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POStore;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.util.PlanHelper;
+import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.plan.VisitorException;
+import org.apache.pig.impl.util.ObjectSerializer;
 import org.apache.pig.newplan.Operator;
 import org.apache.pig.tools.pigstats.PigStats.JobGraph;
 import org.apache.pig.tools.pigstats.ScriptState;
@@ -67,13 +71,17 @@ public class MRScriptState extends ScriptState {
         return (MRScriptState) ScriptState.get();
     }
 
-    public void addSettingsToConf(MapReduceOper mro, Configuration conf) {
+    public void addSettingsToConf(MapReduceOper mro, Configuration conf) throws IOException{
         LOG.info("Pig script settings are added to the job");
         conf.set(PIG_PROPERTY.HADOOP_VERSION.toString(), getHadoopVersion());
         conf.set(PIG_PROPERTY.VERSION.toString(), getPigVersion());
         conf.set(PIG_PROPERTY.SCRIPT_ID.toString(), id);
         conf.set(PIG_PROPERTY.SCRIPT.toString(), getSerializedScript());
         conf.set(PIG_PROPERTY.COMMAND_LINE.toString(), getCommandLine());
+        if (isPlanSerializationEnabled()) {
+            conf.set(PIG_PROPERTY.LOGICAL_PLAN.toString(), getSerializedLogicalPlan());
+            conf.set(PIG_PROPERTY.LOGICAL_PLAN_HASH.toString(), getScriptHash());
+        }
 
         try {
             LinkedList<POStore> stores = PlanHelper.getPhysicalOperators(mro.mapPlan, POStore.class);
@@ -116,6 +124,24 @@ public class MRScriptState extends ScriptState {
         conf.set("mapreduce.workflow.id", "pig_" + id);
         conf.set("mapreduce.workflow.name", getFileName().isEmpty() ? "default" : getFileName());
         conf.set("mapreduce.workflow.node.name", mro.getOperatorKey().toString());
+    }
+
+    private String getScriptHash() throws FrontendException {
+        return ((HExecutionEngine)pigContext.getExecutionEngine()).getLogicalPlan().getHash();
+    }
+
+    private boolean isPlanSerializationEnabled() {
+        if(pigContext == null) {
+            return false;
+        }
+
+        return "true".equals(pigContext.getProperties().
+                getProperty(PIG_PROPERTY.ENABLE_PLAN_SERIALIZATION.toString(),
+                        "true"));
+    }
+
+    private String getSerializedLogicalPlan() throws IOException {
+        return ObjectSerializer.serialize(((HExecutionEngine)pigContext.getExecutionEngine()).getLogicalPlan());
     }
 
     public void addWorkflowAdjacenciesToConf(MROperPlan mrop, Configuration conf) {

@@ -18,18 +18,20 @@
 
 package org.apache.pig.parser;
 
+import java.io.Serializable;
+
 import org.apache.pig.parser.PigParserNode.InvocationPoint;
 
-public class SourceLocation {
+public class SourceLocation implements Serializable {
     private String file = null; // Name of the source, null if unknown.
     private int line = -1; // line number, -1 if unknown.
     private int offset = -1; // offset, -f if unknown.
     
-    private PigParserNode node; // corresponding parser tree node
+    private transient PigParserNode node; // corresponding parser tree node
     
     public SourceLocation() {
     }
-    
+
     public SourceLocation(String filename, int line, int offset) {
     	this.file = filename;
     	this.line = line;

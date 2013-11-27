@@ -18,6 +18,7 @@
 
 package org.apache.pig.newplan.logical.relational;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,9 +32,9 @@ import org.apache.pig.newplan.logical.expression.LogicalExpression;
 /**
  * Schema, from a logical perspective.
  */
-public class LogicalSchema {
+public class LogicalSchema implements Serializable  {
 
-    public static class LogicalFieldSchema {
+    public static class LogicalFieldSchema implements Serializable {
         public String alias;
         public byte type;
         public long uid;

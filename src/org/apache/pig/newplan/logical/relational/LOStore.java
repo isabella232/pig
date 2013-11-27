@@ -35,7 +35,7 @@ public class LOStore extends LogicalRelationalOperator {
     private final String signature;
     private boolean isTmpStore;
     private SortInfo sortInfo;
-    private final StoreFuncInterface storeFunc;
+    private transient final StoreFuncInterface storeFunc;
     private boolean disambiguationEnabled = true;
 
     public LOStore(LogicalPlan plan, FileSpec outputFileSpec, StoreFuncInterface storeFunc, String signature) {
@@ -50,7 +50,7 @@ public class LOStore extends LogicalRelationalOperator {
         this(plan, outputFileSpec, storeFunc, signature);
         this.disambiguationEnabled = disambiguationEnabled;
     }
-    
+
     public FileSpec getOutputSpec() {
         return output;
     }

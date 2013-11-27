@@ -127,6 +127,7 @@ import org.apache.pig.impl.util.Utils;
 import org.apache.pig.tools.pigstats.mapreduce.MRJobStats;
 import org.apache.pig.tools.pigstats.mapreduce.MRPigStatsUtil;
 import org.apache.pig.tools.pigstats.mapreduce.MRScriptState;
+import org.apache.pig.newplan.logical.relational.LogicalPlan;
 
 /**
  * This is compiler class that takes an MROperPlan and converts
@@ -520,7 +521,11 @@ public class JobControlCompiler{
         String setScriptProp = conf.get(PigConfiguration.PIG_SCRIPT_INFO_ENABLED, "true");
         if (setScriptProp.equalsIgnoreCase("true")) {
             MRScriptState ss = MRScriptState.get();
-            ss.addSettingsToConf(mro, conf);
+            try {
+                ss.addSettingsToConf(mro, conf);
+            } catch (IOException ex) {
+                throw new JobCreationException("Unable to add logical Plan to job configuration");
+            }
         }
 
         conf.set(MRConfiguration.MAPPER_NEW_API, "true");

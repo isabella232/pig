@@ -53,7 +53,7 @@ import com.google.common.collect.Lists;
 public class UserFuncExpression extends LogicalExpression {
 
     private FuncSpec mFuncSpec;
-    private EvalFunc<?> ef = null;
+    private transient EvalFunc<?> ef = null;
     private String signature;
     private static int sigSeq=0;
     private boolean viaDefine=false; //this represents whether the function was instantiate via a DEFINE statement or not
