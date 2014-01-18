@@ -25,7 +25,6 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -33,6 +32,7 @@ import org.junit.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigInputFormat;
@@ -40,9 +40,6 @@ import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigSplit;
 import org.apache.pig.impl.plan.OperatorKey;
 import org.junit.Before;
 import org.junit.Test;
-
-import parquet.hadoop.ParquetInputSplit;
-import parquet.hadoop.metadata.BlockMetaData;
 
 public class TestSplitCombine {
     private Configuration conf;
@@ -521,14 +518,13 @@ public class TestSplitCombine {
 
     @Test
     public void test11() throws IOException, InterruptedException {
+
         // verify locations in order
         ArrayList<InputSplit> rawSplits = new ArrayList<InputSplit>();
 
-        // first split is parquetinputsplit
-        rawSplits.add(new ParquetInputSplit(new Path("path1"), 0, 100,
-                new String[] { "l1", "l2", "l3" },
-                new ArrayList<BlockMetaData>(), "", "",
-                new HashMap<String, String>(), new HashMap<String, String>()));
+        // first split is OrcSplit
+        rawSplits.add(new OrcSplit(new Path("path1"),0,100,new String[]{"l1", "l2", "l3"},null,false,false, new ArrayList<Long>(),100));
+
         // second split is file split
         rawSplits.add(new FileSplit(new Path("path2"), 0, 400, new String[] {
                 "l5", "l6", "l1" }));
@@ -559,7 +555,7 @@ public class TestSplitCombine {
             Assert.assertEquals(500, anotherSplit.getLength());
 
             Assert.assertEquals(2, anotherSplit.getNumPaths());
-            Assert.assertEquals("parquet.hadoop.ParquetInputSplit",
+            Assert.assertEquals("org.apache.hadoop.hive.ql.io.orc.OrcSplit",
                     (anotherSplit.getWrappedSplit(0).getClass().getName()));
             Assert.assertEquals(
                     "org.apache.hadoop.mapreduce.lib.input.FileSplit",

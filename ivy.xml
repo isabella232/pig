@@ -262,7 +262,7 @@
       <exclude org="org.slf4j" module="log4j12"/>
       <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
-    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-hs" 
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-hs"
       rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
       <exclude org="org.slf4j" module="slf4j"/>
       <exclude org="org.slf4j" module="slf4j-api"/>
@@ -523,7 +523,6 @@
 
     <dependency org="org.mockito" name="mockito-all" rev="${mockito.version}" conf="test->default"/>
 
-    <dependency org="com.twitter" name="parquet-pig-bundle" rev="${parquet-pig-bundle.version}" conf="compile->master"/>
 
     <!-- for Spark integration -->
     <dependency org="org.apache.spark" name="spark-core_2.11" rev="${spark.version}" conf="spark->default">

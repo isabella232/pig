@@ -17,6 +17,8 @@
 package org.apache.pig.builtin;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.apache.hadoop.mapreduce.Job;
@@ -36,14 +38,32 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
     }
     
     public ParquetLoader(String requestedSchemaStr) throws FrontendException {
+        Throwable exception = null;
         try {
-            init(new parquet.pig.ParquetLoader(requestedSchemaStr));
+            Class parquetLoader = Class.forName("parquet.pig.ParquetLoader");
+            Constructor constructor = parquetLoader.getConstructor(String.class);
+
+            init((LoadMetadata) constructor.newInstance(requestedSchemaStr));
         }
         // if compile time dependency not found at runtime
         catch (NoClassDefFoundError e) {
-            throw new FrontendException(String.format("Cannot instantiate class %s (%s)",
-                    getClass().getName(), "parquet.pig.ParquetLoader"), 2259, e);
+            exception = e;
+        } catch (ClassNotFoundException e) {
+            exception = e;
+        } catch (NoSuchMethodException e) {
+            exception = e;
+        } catch (InvocationTargetException e) {
+            exception = e;
+        } catch (InstantiationException e) {
+            exception = e;
+        } catch (IllegalAccessException e) {
+            exception = e;
         }
+
+      if(exception != null) {
+          throw new FrontendException(String.format("Cannot instantiate class %s (%s)",
+            getClass().getName(), "parquet.pig.ParquetLoader"), 2259, exception);
+      }
     }
     
     private void init(LoadMetadata loadMetadata) {
@@ -52,7 +72,11 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
     
     @Override
     public void setLocation(String location, Job job) throws IOException {
-        JarManager.addDependencyJars(job, parquet.Version.class);
+        try {
+            JarManager.addDependencyJars(job, Class.forName("parquet.Version.class"));
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Runtime parquet dependency not found", e);
+        }
         super.setLocation(location, job);
     }
 

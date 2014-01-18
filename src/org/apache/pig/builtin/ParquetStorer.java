@@ -30,13 +30,24 @@ import org.apache.pig.impl.util.JarManager;
 public class ParquetStorer extends StoreFuncMetadataWrapper {
 
     public ParquetStorer() throws FrontendException {
+        Throwable exception = null;
         try {
-            init(new parquet.pig.ParquetStorer());
+            init((StoreMetadata) Class.forName("parquet.pig.ParquetStorer").newInstance());
         }
         // if compile time dependency not found at runtime
         catch (NoClassDefFoundError e) {
+          exception = e;
+        } catch (ClassNotFoundException e) {
+          exception = e;
+        } catch (InstantiationException e) {
+          exception = e;
+        } catch (IllegalAccessException e) {
+          exception = e;
+        }
+
+        if(exception != null) {
             throw new FrontendException(String.format("Cannot instantiate class %s (%s)",
-                    getClass().getName(), "parquet.pig.ParquetStorer"), 2259, e);
+              getClass().getName(), "parquet.pig.ParquetStorer"), 2259, exception);
         }
     }
     
@@ -49,8 +60,12 @@ public class ParquetStorer extends StoreFuncMetadataWrapper {
      */
     @Override
     public void setStoreLocation(String location, Job job) throws IOException {
-        JarManager.addDependencyJars(job, parquet.Version.class);
-        super.setStoreLocation(location, job);
+      try {
+          JarManager.addDependencyJars(job, Class.forName("parquet.Version.class"));
+      } catch (ClassNotFoundException e) {
+          throw new IOException("Runtime parquet dependency not found", e);
+      }
+      super.setStoreLocation(location, job);
     }
     
 }
