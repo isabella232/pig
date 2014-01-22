@@ -16,3 +16,4 @@ slf4j-api.version=org.slf4j:slf4j-api.version
 slf4j-log4j12.version=org.slf4j:slf4j-log4j12.version
 parquet-pig-bundle.version=com.twitter:parquet-pig.version
 snappy-java.version=org.xerial.snappy:snappy-java.version
+commons-lang.version=commons-lang:commons-lang.version
