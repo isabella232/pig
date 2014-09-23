@@ -69,6 +69,7 @@
     <module>pig</module>
     <module>pigunit</module>
     <module>pigsmoke</module>
+    <module>piggybank</module>
   </modules>
   
 </project>
