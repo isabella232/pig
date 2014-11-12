@@ -441,7 +441,12 @@
     <dependency org="org.htrace" name="htrace-core" rev="3.0.4" conf="hadoop2->master"/>
     <dependency org="org.apache.htrace" name="htrace-core" rev="${htrace.version}" conf="hadoop2->master"/>
     <dependency org="org.fusesource.leveldbjni" name="leveldbjni-all" rev="${leveldbjni.version}"
-      conf="hadoop2->master"/>
+      conf="hadoop2->master">
+      <exclude org="org.slf4j" module="slf4j"/>
+      <exclude org="org.slf4j" module="slf4j-api"/>
+      <exclude org="org.slf4j" module="log4j12"/>
+      <exclude org="org.slf4j" module="slf4j-log4j12"/>
+    </dependency>
     <dependency org="org.cloudera.htrace" name="htrace-core" rev="2.00" conf="hbase1->master">
       <artifact name="htrace-core" type="jar"/>
     </dependency>
