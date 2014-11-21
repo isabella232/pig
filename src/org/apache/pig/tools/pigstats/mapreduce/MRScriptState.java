@@ -79,8 +79,12 @@ public class MRScriptState extends ScriptState {
         conf.set(PIG_PROPERTY.SCRIPT.toString(), getSerializedScript());
         conf.set(PIG_PROPERTY.COMMAND_LINE.toString(), getCommandLine());
         if (isPlanSerializationEnabled()) {
-            conf.set(PIG_PROPERTY.LOGICAL_PLAN.toString(), getSerializedLogicalPlan());
-            conf.set(PIG_PROPERTY.LOGICAL_PLAN_HASH.toString(), getScriptHash());
+            // CDH-23366 : In ILLUSTRATE command codepath, the PigContext's execution engine
+            // does not have the Logical Plan set at this point.
+            if (!pigContext.inIllustrator) {
+                conf.set(PIG_PROPERTY.LOGICAL_PLAN.toString(), getSerializedLogicalPlan());
+                conf.set(PIG_PROPERTY.LOGICAL_PLAN_HASH.toString(), getScriptHash());
+            }
         }
 
         try {
