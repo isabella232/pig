@@ -173,7 +173,7 @@ if [ "$includeHCatalog" == "true" ]; then
   hiveExecVersion=`ls $HIVE_HOME/lib/$hiveExecJar`
   fbJarVersion=`ls $HIVE_HOME/lib/$fbJar`
   jdoECJarVersion=`ls $HIVE_HOME/lib/$jdoECJar`
-  slfJarVersion=`ls $HIVE_HOME/lib/$slfJar`
+  slfJarVersion=`ls $HIVE_HOME/lib/$slfJar 2>/dev/null`
   hbaseHiveVersion=`ls $HIVE_HOME/lib/$hbaseHiveJar`
 
   # hcatalog jar name for 0.4 and earlier

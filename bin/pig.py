@@ -165,8 +165,6 @@ if includeHCatalog == True:
     jar = glob.glob(os.path.join(hiveJarLoc, jarName))
     if (len(jar) != 0) and (os.path.exists(jar)):
       classpath += os.pathsep + jar[0]
-    else:
-      sys.exit("Failed to find the jar %s" % os.path.join(hiveJarLoc, jarName))
 
   # done with adding the hive jars required by hcatalog
 
