@@ -248,7 +248,7 @@
       <exclude org="org.slf4j" module="log4j12"/>
       <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
-    <dependency org="org.apache.hadoop" name="hadoop-yarn-client" 
+    <dependency org="org.apache.hadoop" name="hadoop-yarn-client"
       rev="${hadoop-mapreduce.version}" conf="hadoop2->master">
       <exclude org="org.slf4j" module="slf4j"/>
       <exclude org="org.slf4j" module="slf4j-api"/>
@@ -447,8 +447,11 @@
       <exclude org="org.slf4j" module="log4j12"/>
       <exclude org="org.slf4j" module="slf4j-log4j12"/>
     </dependency>
-    <dependency org="org.cloudera.htrace" name="htrace-core" rev="2.00" conf="hbase1->master">
+    <dependency org="org.apache.htrace" name="htrace-core" rev="3.2.0-incubating" conf="hbase1->master">
       <artifact name="htrace-core" type="jar"/>
+    </dependency>
+    <dependency org="org.apache.htrace" name="htrace-core4" rev="4.0.1-incubating" conf="hbase1->master">
+      <artifact name="htrace-core4" type="jar"/>
     </dependency>
     <dependency org="com.lmax" name="disruptor" rev="3.3.0" conf="hbase1->master"/>
 
@@ -566,6 +569,8 @@
     <dependency org="org.apache.curator" name="curator-framework" rev="${curator.version}"
       conf="hadoop2->master"/>
     <dependency org="org.apache.curator" name="curator-client" rev="${curator.version}"
+      conf="hadoop2->master"/>
+    <dependency org="org.apache.curator" name="curator-recipes" rev="${curator.version}"
       conf="hadoop2->master"/>
   </dependencies>
 </ivy-module>
