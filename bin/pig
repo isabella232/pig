@@ -203,7 +203,7 @@ if [ "$includeHCatalog" == "true" ]; then
     # in 0.5 and newer we need to add multiple jars to the class path
     hbaseHCatJarPath="$HCAT_HOME/share/hcatalog/storage-handlers/hbase/lib/*"
   else
-    hbaseHCatJarPath=`ls $HCAT_HOME/lib/$hbaseHCatJar`
+    hbaseHCatJarPath=`ls $HCAT_HOME/lib/$hbaseHCatJar 2>/dev/null`
   fi
   
   # get the pig storage handler jar
