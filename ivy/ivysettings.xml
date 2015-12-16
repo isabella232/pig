@@ -33,8 +33,14 @@
   <property name="repo.jboss.org" value="http://repository.jboss.com/nexus/content/groups/public/" override="false"/>
   <property name="repo.apache.snapshots" value="http://repository.apache.org/content/groups/snapshots-group/" override="false"/>
   <property name="repo.dir" value="${user.home}/.m2/repository" override="false"/>
-  <property name="maven2.pattern" value="[organisation]/[module]/[revision]/[module]-[revision](-[classifier])"/>
+  <property name="maven2.pattern" value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier])"/>
   <property name="maven2.pattern.ext" value="${maven2.pattern}.[ext]"/>
+  <property name="releases.cloudera.com"
+            value="https://repository.cloudera.com/content/groups/cdh-releases-rcs"
+            override="false" />
+  <property name="snapshots.cloudera.com"
+            value="https://repository.cloudera.com/content/repositories/snapshots"
+            override="false"/>
   <property name="snapshot.pattern" value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
   <property name="resolvers" value="default" override="false"/>
   <property name="force-resolve" value="false" override="false"/>
@@ -52,9 +58,9 @@
          checkmodified="true" changingPattern=".*SNAPSHOT" m2compatible="true"/>
     <ibiblio name="apache-snapshot" root="${snapshot.apache.org}" pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="cloudera-releases" m2compatible="true" pattern="${maven2.pattern.ext}"
-      root="https://repository.cloudera.com/content/groups/cdh-releases-rcs" checkmodified="true"/>
+      root="${releases.cloudera.com}" checkmodified="true"/>
     <ibiblio name="cloudera-snapshots" m2compatible="true" pattern="${maven2.pattern.ext}"
-      root="https://repository.cloudera.com/content/repositories/snapshots" checkmodified="true"/>
+      root="${snapshots.cloudera.com}" checkmodified="true" changingPattern=".*SNAPSHOT"/>
     <filesystem name="fs" m2compatible="true" checkconsistency="false" force="${force-resolve}"
          checkmodified="true" changingPattern=".*SNAPSHOT">
 
@@ -92,5 +98,6 @@
     <module organisation="org.apache.hadoop" name=".*" resolver="cloudera" />
     <module organisation="org.apache.hbase" name=".*" resolver="cloudera" />
     <module organisation="org.apache.zookeeper" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.avro" name=".*" resolver="cloudera" />
   </modules>
 </ivysettings>
