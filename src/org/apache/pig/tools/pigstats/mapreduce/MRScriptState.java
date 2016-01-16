@@ -42,6 +42,7 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.plan.VisitorException;
 import org.apache.pig.impl.util.ObjectSerializer;
 import org.apache.pig.newplan.Operator;
+import org.apache.pig.newplan.logical.relational.LogicalPlan;
 import org.apache.pig.tools.pigstats.PigStats.JobGraph;
 import org.apache.pig.tools.pigstats.ScriptState;
 import org.apache.pig.tools.pigstats.JobStats;
@@ -131,7 +132,15 @@ public class MRScriptState extends ScriptState {
     }
 
     private String getScriptHash() throws FrontendException {
-        return ((HExecutionEngine)pigContext.getExecutionEngine()).getLogicalPlan().getHash();
+
+        if (pigContext.getExecutionEngine() != null) {
+            LogicalPlan logicalPlan = ((HExecutionEngine) pigContext.getExecutionEngine()).getLogicalPlan();
+            if (logicalPlan != null) {
+                return logicalPlan.getHash();
+            }
+        }
+
+        return "";
     }
 
     private boolean isPlanSerializationEnabled() {
