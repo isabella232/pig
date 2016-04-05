@@ -41,7 +41,7 @@
   <property name="snapshots.cloudera.com"
             value="https://repository.cloudera.com/content/repositories/snapshots"
             override="false"/>
-  <property name="snapshot.pattern" value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+  <property name="snapshot.pattern" value="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier])(-test).[ext]"/>
   <property name="resolvers" value="default" override="false"/>
   <property name="force-resolve" value="false" override="false"/>
   <!-- pull in the local repository -->
@@ -50,8 +50,7 @@
   <resolvers>
     <!-- CDH build repo, the pattern attribute handles SNAPSHOT artifacts -->
     <ibiblio name="reactor-repo" root="${reactor.repo}"
-             m2compatible="true"
-             checkmodified="true"/>
+             m2compatible="true" checkmodified="true" pattern="${snapshot.pattern}"/>
     <ibiblio name="maven2" root="${repo.maven.org}" pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="jboss-maven2" root="${repo.jboss.org}" pattern="${maven2.pattern.ext}" m2compatible="true"/>
     <ibiblio name="apache-snapshots" root="${repo.apache.snapshots}" pattern="${snapshot.pattern}"
