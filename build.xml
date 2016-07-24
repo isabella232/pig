@@ -88,7 +88,7 @@
     <property name="javac.debug" value="on" />
     <property name="javac.optimize" value="on" />
     <property name="javac.deprecation" value="off" />
-    <property name="javac.version" value="1.7" />
+    <property name="javac.version" value="1.8" />
     <property name="javac.args" value="" />
     <condition property="javac.args.warnings" value="-Xmaxwarns 1000000 -Xlint -Xlint:-deprecation" else="-Xmaxwarns 1000000">
         <isset property="all.warnings" />
@@ -328,7 +328,7 @@
 
     <!-- JVM version validation -->
     <target name="jvm-check">
-        <property name="javaVersion" value="1.7"/>
+        <property name="javaVersion" value="1.8"/>
 
         <property name="requiredJavaVersion" value="xx${javaVersion}"/>
         <property name="currentJavaVersion" value="xx${java.version}"/>
@@ -957,7 +957,7 @@
             <sysproperty key="ivy.lib.dir" value="${ivy.lib.dir}" />
             <sysproperty key="java.io.tmpdir" value="${junit.tmp.dir}" />
             <sysproperty key="hadoop.log.dir" value="${test.log.dir}"/>
-            <jvmarg line="-XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=128M ${debugArgs} -Djava.library.path=${hadoop.root}\bin"/>
+            <jvmarg line="-XX:+CMSClassUnloadingEnabled ${debugArgs} -Djava.library.path=${hadoop.root}\bin"/>
             <sysproperty key="java.security.krb5.realm" value="" />
             <sysproperty key="java.security.krb5.kdc" value="" />
             <sysproperty key="log4j.configuration" value="file:${basedir}/conf/test-log4j.properties"/>
