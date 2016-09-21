@@ -425,6 +425,18 @@
       <exclude org="com.sun.jersey" module="jersey-server"/>
       <exclude org="com.sun.jersey" module="jersey-json"/>
       <exclude org="asm" module="asm"/>
+
+      <exclude org="org.apache.curator" module="*"/>
+      <exclude org="org.apache.hbase" module="hbase-annotations"/>
+      <exclude org="org.apache.hbase" module="hbase-protocol"/>
+      <exclude org="org.apache.hbase" module="hbase-protocol-shaded"/>
+      <exclude org="org.apache.zookeeper" module="*"/>
+      <exclude org="org.apache.htrace" module="*"/>
+      <exclude org="commons-lang" module="*"/>
+      <exclude org="commons-io" module="*"/>
+      <exclude org="commons-logging" module="*"/>
+      <exclude org="log4j" module="*"/>
+      <exclude org="junit" module="*"/>
     </dependency>
 
     <dependency org="org.apache.hbase" name="hbase-common" rev="${hbase1.version}" conf="hbase1->master">
@@ -465,6 +477,27 @@
       <exclude org="com.google.protobuf" module="protobuf-java"/>
     </dependency>
 
+    <dependency org="org.apache.hbase" name="hbase-protocol-shaded" rev="${hbase1.version}" conf="hbase1->master">
+      <artifact name="hbase-protocol-shaded" type="jar"/>
+      <artifact name="hbase-protocol-shaded" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="com.google.protobuf" module="protobuf-java"/>
+    </dependency>
+
+    <dependency org="org.apache.hbase" name="hbase-procedure" rev="${hbase1.version}" conf="hbase1->master">
+      <artifact name="hbase-procedure" type="jar"/>
+      <artifact name="hbase-procedure" type="test-jar" ext="jar" m:classifier="tests"/>
+    </dependency>
+
+    <dependency org="org.apache.hbase" name="hbase-metrics-api" rev="${hbase1.version}" conf="hbase1->master">
+      <artifact name="hbase-metrics-api" type="jar"/>
+      <artifact name="hbase-metrics-api" type="test-jar" ext="jar" m:classifier="tests"/>
+    </dependency>
+
+    <dependency org="org.apache.hbase" name="hbase-metrics" rev="${hbase1.version}" conf="hbase1->master">
+      <artifact name="hbase-metrics" type="jar"/>
+      <artifact name="hbase-metrics" type="test-jar" ext="jar" m:classifier="tests"/>
+    </dependency>
+
     <dependency org="org.apache.hbase" name="hbase-hadoop-compat" rev="${hbase1.version}" conf="hbase1->master">
       <artifact name="hbase-hadoop-compat" type="jar"/>
       <artifact name="hbase-hadoop-compat" type="test-jar" ext="jar" m:classifier="tests"/>
@@ -501,7 +534,7 @@
     <dependency org="org.apache.htrace" name="htrace-core4" rev="${htrace4.version}" conf="hbase1->master;hadoop3->master">
       <artifact name="htrace-core4" type="jar"/>
     </dependency>
-    <dependency org="com.lmax" name="disruptor" rev="3.3.0" conf="hbase1->master"/>
+    <dependency org="com.lmax" name="disruptor" rev="3.3.6" conf="hbase1->master"/>
 
     <!-- for TestHBaseStorage -->
     <dependency org="org.apache.hbase" name="hbase-procedure" rev="${hbase1.version}" conf="test->master"/>

@@ -45,7 +45,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -64,6 +67,7 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
 import org.apache.hadoop.hbase.mapreduce.TableSplit;
+import org.apache.hadoop.hbase.security.User;
 import org.apache.hadoop.hbase.security.token.TokenUtil;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.WritableComparable;
@@ -99,9 +103,10 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.util.ObjectSerializer;
 import org.apache.pig.impl.util.UDFContext;
 import org.apache.pig.impl.util.Utils;
-import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
+
+import org.joda.time.DateTime;
 
 /**
  * A HBase implementation of LoadFunc and StoreFunc.
@@ -868,16 +873,22 @@ public class HBaseStorage extends LoadFunc implements StoreFuncInterface, LoadPu
     private void addHBaseDelegationToken(Configuration hbaseConf, Job job) {
 
         if (!UDFContext.getUDFContext().isFrontend()) {
+            LOG.debug("skipping authentication checks because we're currently in a frontend UDF context");
             return;
         }
 
         if ("kerberos".equalsIgnoreCase(hbaseConf.get(HBASE_SECURITY_CONF_KEY))) {
+            LOG.info("hbase is configured to use Kerberos, attempting to fetch delegation token.");
             try {
-                UserGroupInformation currentUser = UserGroupInformation.getCurrentUser();
-                if (currentUser.hasKerberosCredentials()) {
-                    TokenUtil.obtainTokenForJob(hbaseConf,currentUser,job);
+                User currentUser = User.getCurrent();
+                UserGroupInformation currentUserGroupInformation = currentUser.getUGI();
+                if (currentUserGroupInformation.hasKerberosCredentials()) {
+                    try (Connection connection = ConnectionFactory.createConnection(hbaseConf, currentUser)) {
+                        TokenUtil.obtainTokenForJob(connection, currentUser, job);
+                        LOG.info("Token retrieval succeeded for user " + currentUser.getName());
+                    }
                 } else {
-                    LOG.info("Not fetching hbase delegation token as no Kerberos TGT is available");
+                    LOG.info("Not fetching hbase delegation token as no Kerberos TGT is available for user " + currentUser.getName());
                 }
             } catch (RuntimeException re) {
                 throw re;
@@ -885,6 +896,8 @@ public class HBaseStorage extends LoadFunc implements StoreFuncInterface, LoadPu
                 throw new UndeclaredThrowableException(e,
                         "Unexpected error calling TokenUtil.obtainTokenForJob()");
             }
+        } else {
+            LOG.info("hbase is not configured to use kerberos, skipping delegation token");
         }
     }
 
@@ -996,9 +1009,9 @@ public class HBaseStorage extends LoadFunc implements StoreFuncInterface, LoadPu
             }
 
             if (!columnInfo.isColumnMap()) {
-                put.add(columnInfo.getColumnFamily(), columnInfo.getColumnName(),
-                        ts, objToBytes(t.get(i), (fieldSchemas == null) ?
-                        DataType.findType(t.get(i)) : fieldSchemas[i].getType()));
+                put.addColumn(columnInfo.getColumnFamily(), columnInfo.getColumnName(), ts, objToBytes(t.get(i),
+                        (fieldSchemas == null) ? DataType.findType(t.get(i)) : fieldSchemas[i].getType()));
+
             } else {
                 Map<String, Object> cfMap = (Map<String, Object>) t.get(i);
                 if (cfMap!=null) {
@@ -1009,7 +1022,8 @@ public class HBaseStorage extends LoadFunc implements StoreFuncInterface, LoadPu
                         }
                         // TODO deal with the fact that maps can have types now. Currently we detect types at
                         // runtime in the case of storing to a cf, which is suboptimal.
-                        put.add(columnInfo.getColumnFamily(), Bytes.toBytes(colName.toString()), ts,
+
+                        put.addColumn(columnInfo.getColumnFamily(), Bytes.toBytes(colName.toString()), ts,
                                 objToBytes(cfMap.get(colName), DataType.findType(cfMap.get(colName))));
                     }
                 }
@@ -1039,7 +1053,7 @@ public class HBaseStorage extends LoadFunc implements StoreFuncInterface, LoadPu
         delete.setTimestamp(timestamp);
 
         if(noWAL_) {
-            delete.setWriteToWAL(false);
+            delete.setDurability(Durability.SKIP_WAL);
         }
 
         return delete;
@@ -1056,9 +1070,9 @@ public class HBaseStorage extends LoadFunc implements StoreFuncInterface, LoadPu
      */
     public Put createPut(Object key, byte type) throws IOException {
         Put put = new Put(objToBytes(key, type));
-
+	
         if(noWAL_) {
-            put.setWriteToWAL(false);
+            put.setDurability(Durability.SKIP_WAL);
         }
 
         return put;

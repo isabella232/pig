@@ -19,6 +19,7 @@ package org.apache.pig.test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,14 +30,20 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.BufferedMutator;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.pig.PigServer;
 import org.apache.pig.backend.executionengine.ExecException;
@@ -47,6 +54,9 @@ import org.apache.pig.data.DataByteArray;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.data.TupleFactory;
+
+import com.google.common.collect.Lists;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -54,13 +64,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-
 public class TestHBaseStorage {
 
     private static final Log LOG = LogFactory.getLog(TestHBaseStorage.class);
     private static HBaseTestingUtility util;
     private static Configuration conf;
+    private static Connection connection;
     private static PigServer pig;
 
     enum DataFormat {
@@ -84,17 +93,23 @@ public class TestHBaseStorage {
     @BeforeClass
     public static void setUp() throws Exception {
         // This is needed by Pig
-        conf = HBaseConfiguration.create(new Configuration());
+        Configuration hadoopConf = new Configuration();
+        hadoopConf.set(HConstants.TEMPORARY_FS_DIRECTORY_KEY, Paths.get(Util.getTestDirectory(TestLoad.class)).toAbsolutePath().toString());
+
+        conf = HBaseConfiguration.create(hadoopConf);
 
         util = new HBaseTestingUtility(conf);
         util.startMiniZKCluster();
         util.startMiniHBaseCluster(1, 1);
+
+        connection = ConnectionFactory.createConnection(conf);
     }
 
     @AfterClass
     public static void oneTimeTearDown() throws Exception {
         // In HBase 0.90.1 and above we can use util.shutdownMiniHBaseCluster()
         // here instead.
+        connection.close();
         MiniHBaseCluster hbc = util.getHBaseCluster();
         if (hbc != null) {
             hbc.shutdown();
@@ -123,7 +138,7 @@ public class TestHBaseStorage {
     // DVR: I've found that it is faster to delete all rows in small tables
     // than to drop them.
     private void deleteAllRows(String tableName) throws Exception {
-        HTable table = new HTable(conf, tableName);
+        Table table = connection.getTable(TableName.valueOf(tableName));
         ResultScanner scanner = table.getScanner(new Scan());
         List<Delete> deletes = Lists.newArrayList();
         for (Result row : scanner) {
@@ -194,7 +209,7 @@ public class TestHBaseStorage {
     public void testLoadWithSpecifiedTimestampAndRanges() throws IOException {
         long beforeTimeStamp = System.currentTimeMillis() - 10;
 
-        HTable table = prepareTable(TESTTABLE_1, true, DataFormat.UTF8PlainText);
+        Table table = prepareTable(TESTTABLE_1, true, DataFormat.UTF8PlainText);
 
         long afterTimeStamp = System.currentTimeMillis() + 10;
 
@@ -216,7 +231,7 @@ public class TestHBaseStorage {
 
         Assert.assertEquals("Timestamp is set after rows added", 0, queryWithTimestamp(null, null, afterTimeStamp));
 
-        long specifiedTimestamp = table.get(new Get(Bytes.toBytes("00"))).getColumnLatest(COLUMNFAMILY, Bytes.toBytes("col_a")).getTimestamp();
+        long specifiedTimestamp = table.get(new Get(Bytes.toBytes("00"))).getColumnLatestCell(COLUMNFAMILY, Bytes.toBytes("col_a")).getTimestamp();
 
         Assert.assertTrue("Timestamp is set equals to row 01", queryWithTimestamp(null, null, specifiedTimestamp) > 0);
 
@@ -1014,7 +1029,7 @@ public class TestHBaseStorage {
                 "org.apache.pig.backend.hadoop.hbase.HBaseStorage('"
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + " "
                 + TESTCOLUMN_C + "','-caster HBaseBinaryConverter')");
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1056,7 +1071,7 @@ public class TestHBaseStorage {
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B +
                 "','-caster HBaseBinaryConverter')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1093,7 +1108,7 @@ public class TestHBaseStorage {
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + " "
                 + TESTCOLUMN_C + "','-caster HBaseBinaryConverter -includeTimestamp true')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1140,7 +1155,7 @@ public class TestHBaseStorage {
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + " "
                 + TESTCOLUMN_C + "','-caster HBaseBinaryConverter -includeTimestamp true')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1187,7 +1202,7 @@ public class TestHBaseStorage {
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + " "
                 + TESTCOLUMN_C + "','-caster HBaseBinaryConverter -includeTimestamp true')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1232,7 +1247,7 @@ public class TestHBaseStorage {
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + " "
                 + TESTCOLUMN_C + "','-caster HBaseBinaryConverter -includeTombstone true')");
 
-        HTable table = new HTable(conf, TESTTABLE_1);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_1));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int count = 0;
@@ -1275,7 +1290,7 @@ public class TestHBaseStorage {
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + " "
                 + TESTCOLUMN_C + "')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1320,8 +1335,8 @@ public class TestHBaseStorage {
             Assert.assertEquals(put.getClass().getMethod("getDurability").invoke(put), skipWal);
             Assert.assertEquals(delete.getClass().getMethod("getDurability").invoke(delete), skipWal);
         } else {
-            Assert.assertFalse(put.getWriteToWAL());
-            Assert.assertFalse(delete.getWriteToWAL());
+            Assert.assertEquals(Durability.SKIP_WAL,put.getDurability());
+            Assert.assertEquals(Durability.SKIP_WAL,delete.getDurability());
         }
     }
 
@@ -1349,8 +1364,8 @@ public class TestHBaseStorage {
             Assert.assertNotEquals(put.getClass().getMethod("getDurability").invoke(put), skipWal);
             Assert.assertNotEquals(delete.getClass().getMethod("getDurability").invoke(delete), skipWal);
         } else {
-            Assert.assertTrue(put.getWriteToWAL());
-            Assert.assertTrue(delete.getWriteToWAL());
+            Assert.assertEquals(Durability.SYNC_WAL,put.getDurability());
+            Assert.assertEquals(Durability.SYNC_WAL,delete.getDurability());
         }
     }
 
@@ -1370,7 +1385,7 @@ public class TestHBaseStorage {
                 "org.apache.pig.backend.hadoop.hbase.HBaseStorage('"
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + "')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1405,7 +1420,7 @@ public class TestHBaseStorage {
                 "org.apache.pig.backend.hadoop.hbase.HBaseStorage('"
                 + TESTCOLUMN_A + " " + TESTCOLUMN_B + "')");
 
-        HTable table = new HTable(conf, TESTTABLE_2);
+        Table table = connection.getTable(TableName.valueOf(TESTTABLE_2));
         ResultScanner scanner = table.getScanner(new Scan());
         Iterator<Result> iter = scanner.iterator();
         int i = 0;
@@ -1464,7 +1479,7 @@ public class TestHBaseStorage {
     // See PIG-4151
     public void testStoreEmptyMap() throws IOException {
         String tableName = "emptyMapTest";
-        HTable table;
+        Table table;
         try {
             deleteAllRows(tableName);
         } catch (Exception e) {
@@ -1474,10 +1489,9 @@ public class TestHBaseStorage {
         cfs[0] = Bytes.toBytes("info");
         cfs[1] = Bytes.toBytes("friends");
         try {
-            table = util.createTable(Bytes.toBytesBinary(tableName),
-                    cfs);
+            table = util.createTable(TableName.valueOf(tableName),cfs);
         } catch (Exception e) {
-            table = new HTable(conf, Bytes.toBytesBinary(tableName));
+            table = connection.getTable(TableName.valueOf(tableName));
         }
 
         File inputFile = Util.createInputFile("test", "tmp", new String[] {"row1;Homer;Morrison;[1#Silvia,2#Stacy]",
@@ -1517,7 +1531,7 @@ public class TestHBaseStorage {
                 + "') as (rowKey:chararray,col_a:int, col_b:double, col_c:chararray);");
     }
 
-    private HTable prepareTable(String tableName, boolean initData,
+    private Table prepareTable(String tableName, boolean initData,
             DataFormat format) throws IOException {
         return prepareTable(tableName, initData, format, TableType.ONE_CF);
     }
@@ -1525,30 +1539,30 @@ public class TestHBaseStorage {
      * Prepare a table in hbase for testing.
      *
      */
-    private HTable prepareTable(String tableName, boolean initData,
+    private Table prepareTable(String tableName, boolean initData,
             DataFormat format, TableType type) throws IOException {
         // define the table schema
-        HTable table = null;
+        Table table = null;
         try {
             if (lastTableType == type) {
                 deleteAllRows(tableName);
             } else {
-                util.deleteTable(tableName);
+                util.deleteTable(TableName.valueOf(tableName));
             }
         } catch (Exception e) {
             // It's ok, table might not exist.
         }
         try {
             if (type == TableType.TWO_CF) {
-                table = util.createTable(Bytes.toBytesBinary(tableName),
+                table = util.createTable(TableName.valueOf(tableName),
                         new byte[][]{COLUMNFAMILY, COLUMNFAMILY2});
             } else {
-                table = util.createTable(Bytes.toBytesBinary(tableName),
+                table = util.createTable(TableName.valueOf(tableName),
                         COLUMNFAMILY);
             }
             lastTableType = type;
         } catch (Exception e) {
-            table = new HTable(conf, Bytes.toBytesBinary(tableName));
+            table = connection.getTable(TableName.valueOf(tableName));
         }
 
         if (initData) {
@@ -1559,23 +1573,23 @@ public class TestHBaseStorage {
                     Put put = new Put(Bytes.toBytes("00".substring(v.length())
                             + v));
                     // sc: int type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("sc"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("sc"),
                             Bytes.toBytes(i));
                     // col_a: int type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("col_a"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("col_a"),
                             Bytes.toBytes(i));
                     // col_b: double type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("col_b"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("col_b"),
                             Bytes.toBytes(i + 0.0));
                     // col_c: string type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("col_c"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("col_c"),
                             Bytes.toBytes("Text_" + i));
                     // prefixed_col_d: string type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("prefixed_col_d"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("prefixed_col_d"),
                             Bytes.toBytes("PrefixedText_" + i));
                     // another cf
                     if (type == TableType.TWO_CF) {
-                        put.add(COLUMNFAMILY2, Bytes.toBytes("col_x"),
+                        put.addColumn(COLUMNFAMILY2, Bytes.toBytes("col_x"),
                                 Bytes.toBytes(i));
                     }
                     table.put(put);
@@ -1584,29 +1598,30 @@ public class TestHBaseStorage {
                     Put put = new Put(
                             ("00".substring(v.length()) + v).getBytes());
                     // sc: int type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("sc"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("sc"),
                             (i + "").getBytes()); // int
                     // col_a: int type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("col_a"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("col_a"),
                             (i + "").getBytes()); // int
                     // col_b: double type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("col_b"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("col_b"),
                             ((i + 0.0) + "").getBytes());
                     // col_c: string type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("col_c"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("col_c"),
                             ("Text_" + i).getBytes());
                     // prefixed_col_d: string type
-                    put.add(COLUMNFAMILY, Bytes.toBytes("prefixed_col_d"),
+                    put.addColumn(COLUMNFAMILY, Bytes.toBytes("prefixed_col_d"),
                             ("PrefixedText_" + i).getBytes());
                     // another cf
                     if (type == TableType.TWO_CF) {
-                        put.add(COLUMNFAMILY2, Bytes.toBytes("col_x"),
+                        put.addColumn(COLUMNFAMILY2, Bytes.toBytes("col_x"),
                                 (i + "").getBytes());
                     }
                     table.put(put);
                 }
             }
-            table.flushCommits();
+            BufferedMutator bm = connection.getBufferedMutator(table.getName());
+            bm.flush();
         }
         return table;
     }
@@ -1631,7 +1646,7 @@ public class TestHBaseStorage {
      */
     private static long getColTimestamp(Result result, String colName) {
         byte[][] colArray = Bytes.toByteArrays(colName.split(":"));
-        return result.getColumnLatest(colArray[0], colArray[1]).getTimestamp();
+        return result.getColumnLatestCell(colArray[0], colArray[1]).getTimestamp();
     }
 
 }
