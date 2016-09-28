@@ -32,6 +32,7 @@ import org.junit.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.AcidInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
@@ -523,7 +524,8 @@ public class TestSplitCombine {
         ArrayList<InputSplit> rawSplits = new ArrayList<InputSplit>();
 
         // first split is OrcSplit
-        rawSplits.add(new OrcSplit(new Path("path1"),0,100,new String[]{"l1", "l2", "l3"},null,false,false, new ArrayList<Long>(),100));
+        rawSplits.add(new OrcSplit(new Path("path1"),0L,0L,100L,new String[]{"l1", "l2", "l3"},null,false,false,
+                new ArrayList<AcidInputFormat.DeltaMetaData>(),100,100));
 
         // second split is file split
         rawSplits.add(new FileSplit(new Path("path2"), 0, 400, new String[] {

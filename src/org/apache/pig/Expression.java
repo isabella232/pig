@@ -17,10 +17,19 @@
  */
 package org.apache.pig;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
+import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
+import org.apache.hadoop.hive.serde2.io.TimestampWritable;
 import org.apache.pig.classification.InterfaceAudience;
 import org.apache.pig.classification.InterfaceStability;
+import org.apache.pig.data.DataType;
+import org.joda.time.DateTime;
 
 /**
  * A class to communicate Filter expressions to LoadFuncs.
@@ -79,11 +88,17 @@ public abstract class Expression {
 
     protected OpType opType;
 
+    protected byte dataType;
+
     /**
      * @return the opType
      */
     public OpType getOpType() {
         return opType;
+    }
+
+    public byte getDataType() {
+        return dataType;
     }
 
     //TODO: Apply a optimizer to Expression from PredicatePushdownOptimizer and
@@ -221,9 +236,10 @@ public abstract class Expression {
         /**
          * @param name
          */
-        public Column(String name) {
+        public Column(String name, byte dataType) {
             this.opType = OpType.TERM_COL;
             this.name = name;
+            this.dataType = dataType;
         }
 
         @Override

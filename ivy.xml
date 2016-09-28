@@ -31,7 +31,7 @@
     <conf name="default" extends="master,runtime"/>
     <conf name="runtime" extends="compile,test" description="runtime but not the artifact" />
     <!--Private configurations. -->
-    <conf name="compile" extends="hadoop${hadoopversion},hbase${hbaseversion}" visibility="private" description="compile artifacts"/>
+    <conf name="compile" extends="hadoop${hadoopversion},hbase${hbaseversion},hive${hiveversion}" visibility="private" description="compile artifacts"/>
     <conf name="test" extends="compile" visibility="private"/>
     <conf name="javadoc" visibility="private" extends="compile,test"/>
     <conf name="releaseaudit" visibility="private"/>
@@ -42,6 +42,8 @@
     <conf name="hadoop3" visibility="private"/>
     <conf name="hbase1" visibility="private"/>
     <conf name="spark" visibility="private" />
+    <conf name="hive1" visibility="private"/>
+    <conf name="hive2" visibility="private"/>
   </configurations>
   <publications>
     <artifact name="pig" conf="master"/>
@@ -591,16 +593,24 @@
       conf="compile->master" />
     <dependency org="org.apache.hive" name="hive-common" rev="${hive.version}" changing="true"
       conf="compile->master" />
+    <dependency org="org.apache.hive" name="hive-metastore" rev="${hive.version}" changing="true"
+      conf="compile->master" />
     <dependency org="org.apache.hive.shims" name="hive-shims-common" rev="${hive.version}" changing="true"
       conf="compile->master" />
     <dependency org="org.apache.hive" name="hive-contrib" rev="${hive.version}" changing="true"
-                conf="test->master" />
+      conf="test->master" />
     <dependency org="org.apache.hive.shims" name="hive-shims-0.23" rev="${hive.version}" changing="true"
       conf="hadoop2->master;hadoop3->master" />
+    <dependency org="org.apache.hive" name="hive-orc" rev="${hive.version}" changing="true"
+      conf="hive2->master" />
+    <dependency org="org.apache.hive" name="hive-storage-api" rev="${hive.version}" changing="true"
+      conf="hive2->master" />
     <dependency org="org.iq80.snappy" name="snappy" rev="${snappy.version}"
       conf="test->master" />
-    <dependency org="com.esotericsoftware.kryo" name="kryo" rev="${kryo.version}"
-      conf="compile->master" />
+    <dependency org="com.esotericsoftware" name="kryo-shaded" rev="${kryo.version}"
+      conf="hive2->default" />
+    <dependency org="com.esotericsoftware.kryo" name="kryo" rev="2.22"
+      conf="hive1->default" />
     <dependency org="org.apache.commons" name="commons-lang3" rev="${commons-lang3.version}"
       conf="compile->master" />
 

@@ -105,5 +105,7 @@
     <module organisation="org.apache.hbase" name=".*" resolver="cloudera" />
     <module organisation="org.apache.zookeeper" name=".*" resolver="cloudera" />
     <module organisation="org.apache.avro" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.hive" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.hive.shims" name=".*" resolver="cloudera" />
   </modules>
 </ivysettings>
