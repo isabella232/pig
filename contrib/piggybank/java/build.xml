@@ -61,8 +61,16 @@
     </if>
     <property name="hadoopversion" value="2" />
 
-    <condition property="hadoopsuffix" value="2" else="">
-        <equals arg1="${hadoopversion}" arg2="2"/>
+    <if>
+        <equals arg1="${hadoopversion}" arg2="3"/>
+        <then>
+            <var name="javac.version" unset="true"/>
+            <property name="javac.version" value="1.8" />
+        </then>
+    </if>
+
+    <condition property="hadoopsuffix" value="3" else="2">
+        <equals arg1="${hadoopversion}" arg2="3"/>
     </condition>
 
     <!-- jar properties -->
@@ -86,7 +94,7 @@
     <property name="build.ivy.maven.pom" location="${build.ivy.maven.dir}/pig-${version}.pom" />
     <property name="build.ivy.maven.jar" location="${build.ivy.maven.dir}/pig-${version}-core.jar" />
 
-    <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
+    <loadproperties srcfile="${ivy.dir}/libraries-common.properties"/>
     <property name="ivysettings.xml" location="${ivy.dir}/ivysettings.xml" />
     <property name="ivy.jar" location="${ivy.dir}/ivy-${ivy.version}.jar"/>
     <property name="mvnrepo" value="http://repo2.maven.org/maven2"/>

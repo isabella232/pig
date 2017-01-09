@@ -97,6 +97,7 @@
     <!-- artifact jar file names -->
     <property name="artifact.pig.jar" value="${final.name}.jar"/>
     <property name="artifact.pig-h2.jar" value="${final.name}-h2.jar"/>
+    <property name="artifact.pig-h3.jar" value="${final.name}-h3.jar"/>
     <property name="artifact.pig-sources.jar" value="${final.name}-sources.jar"/>
     <property name="artifact.pig-javadoc.jar" value="${final.name}-javadoc.jar"/>
     <property name="artifact.pig.tar" value="${final.name}.tar.gz"/>
@@ -104,12 +105,15 @@
     <!-- jar names. TODO we might want to use the svn reversion name in the name in case it is a dev version -->
     <property name="output.jarfile.withouthadoop" value="${build.dir}/${final.name}-withouthadoop.jar" />
     <property name="output.jarfile.withouthadoop-h2" value="${legacy.dir}/${final.name}-withouthadoop-h2.jar" />
+    <property name="output.jarfile.withouthadoop-h3" value="${legacy.dir}/${final.name}-withouthadoop-h3.jar" />
     <property name="output.jarfile.core" value="${build.dir}/${artifact.pig.jar}" />
     <property name="output.jarfile.core-h2" value="${build.dir}/${artifact.pig-h2.jar}" />
+    <property name="output.jarfile.core-h3" value="${build.dir}/${artifact.pig-h3.jar}" />
     <property name="output.jarfile.sources" value="${build.dir}/${artifact.pig-sources.jar}" />
     <property name="output.jarfile.javadoc" value="${build.dir}/${artifact.pig-javadoc.jar}" />
     <!-- Maintain old pig.jar in top level directory. -->
     <property name="output.jarfile.backcompat-core-h2" value="${basedir}/${final.name}-core-h2.jar" />
+    <property name="output.jarfile.backcompat-core-h3" value="${basedir}/${final.name}-core-h3.jar" />
 
     <!-- test properties -->
     <condition property="test.exec.type" value="${exectype}" else="mr">
@@ -175,8 +179,6 @@
 
     <target name="setTezEnv">
         <propertyreset name="test.timeout" value="900000" />
-        <propertyreset name="hadoopversion" value="2" />
-        <propertyreset name="isHadoop2" value="true" />
         <propertyreset name="src.shims.dir" value="${basedir}/shims/src/hadoop${hadoopversion}" />
         <propertyreset name="src.shims.test.dir" value="${basedir}/shims/test/hadoop${hadoopversion}" />
         <propertyreset name="src.exclude.dir" value="" />
@@ -226,8 +228,6 @@
     <property name="ivy.repo.dir" value="${user.home}/ivyrepo" />
     <property name="ivy.dir" location="ivy" />
     <property name="loglevel" value="quiet" />
-    <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
-
 
     <!--
       Hadoop master version
@@ -247,6 +247,18 @@
         <equals arg1="${hadoopversion}" arg2="2"/>
     </condition>
 
+    <condition property="isHadoop3">
+        <equals arg1="${hadoopversion}" arg2="3"/>
+    </condition>
+
+    <if>
+        <equals arg1="${hadoopversion}" arg2="3"/>
+        <then>
+            <var name="javac.version" unset="true"/>
+            <property name="javac.version" value="1.8" />
+        </then>
+    </if>
+
     <!--
       HBase master version
       (Value 95 is translated for backward compatibility in old build scripts)
@@ -260,6 +272,8 @@
         </then>
     </if>
     <property name="hbaseversion" value="1" />
+
+    <loadproperties srcfile="${ivy.dir}/libraries-common.properties"/>
 
     <property name="src.shims.dir" value="${basedir}/shims/src/hadoop${hadoopversion}" />
     <property name="src.shims.test.dir" value="${basedir}/shims/test/hadoop${hadoopversion}" />
@@ -590,7 +604,8 @@
         <echo>*** Building Main Sources ***</echo>
         <echo>*** To compile with all warnings enabled, supply -Dall.warnings=1 on command line ***</echo>
         <echo>*** Else, you will only be warned about deprecations ***</echo>
-        <echo>*** Hadoop version used: ${hadoopversion} ; HBase version used: ${hbaseversion} ***</echo>
+        <echo>*** Hadoop version used: ${hadoopversion} (${hadoop-common.version}); HBase version used: ${hbaseversion} (${hbase1.version})***</echo>
+        <echo>*** javac version used: ${javac.version}</echo>
         <compileSources sources="${src.dir};${src.gen.dir};${src.lib.dir}/bzip2;${src.shims.dir}"
             excludes="${src.exclude.dir}" dist="${build.classes}" cp="classpath" warnings="${javac.args.warnings}" />
         <copy todir="${build.classes}/META-INF">
@@ -719,6 +734,23 @@
         </jar>
     </target>
 
+
+    <!-- ================================================================== -->
+    <!-- Facede to build pig.jar for both Hadoop 2 and Hadoop 3             -->
+    <!-- ================================================================== -->
+    <target name="jar-h23" description="Create pig for both Hadoop 2 and Hadoop 3">
+        <propertyreset name="hadoopversion" value="2" />
+        <propertyreset name="src.shims.dir" value="${basedir}/shims/src/hadoop${hadoopversion}" />
+        <antcall target="clean" inheritRefs="true" inheritall="true"/>
+        <antcall target="jar" inheritRefs="true" inheritall="true"/>
+        <delete dir="${build.dir}" />
+        <propertyreset name="isHadoop2" value="false" />
+        <propertyreset name="hadoopversion" value="3" />
+        <propertyreset name="src.shims.dir" value="${basedir}/shims/src/hadoop${hadoopversion}" />
+        <propertyreset name="src.exclude.dir" value="" />
+        <antcall target="jar" inheritRefs="true" inheritall="true"/>
+    </target>
+
     <!-- ================================================================== -->
     <!-- Make pig.jar                                                       -->
     <!-- ================================================================== -->
@@ -729,6 +761,8 @@
         <antcall target="copySparkDependencies"/>
         <antcall target="copyh2Dependencies"/>
         <antcall target="copyHadoop2LocalRuntimeDependencies" />
+        <antcall target="copyh3Dependencies"/>
+        <antcall target="copyHadoop3LocalRuntimeDependencies" />
     </target>
 
     <target name="copyCommonDependencies">
@@ -775,7 +809,7 @@
         </copy>
     </target>
 
-    <target name="copyh2Dependencies" if="isHadoop2">
+    <target name="copyh2Dependencies" unless="isHadoop3">
         <mkdir dir="${lib.dir}/h2" />
         <copy todir="${lib.dir}/h2">
             <fileset dir="${ivy.lib.dir}" includes="avro-mapred-*.jar"/>
@@ -789,7 +823,7 @@
         <move file="${output.jarfile.withouthadoop}" tofile="${output.jarfile.withouthadoop-h2}"/>
     </target>
 
-    <target name="copyHadoop2LocalRuntimeDependencies">
+    <target name="copyHadoop2LocalRuntimeDependencies" unless="isHadoop3">
         <mkdir dir="${lib.dir}/hadoop2-runtime" />
         <copy todir="${lib.dir}/hadoop2-runtime">
             <fileset dir="${ivy.lib.dir}" includes="hadoop-*.jar"/>
@@ -806,6 +840,40 @@
             <fileset dir="${ivy.lib.dir}" includes="slf4j-*.jar"/>
         </copy>
     </target>
+
+    <target name="copyh3Dependencies" if="isHadoop3">
+        <mkdir dir="${lib.dir}/h3" />
+        <copy todir="${lib.dir}/h3">
+            <fileset dir="${ivy.lib.dir}" includes="avro-mapred-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="hive-shims-0.*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="hbase-hadoop2*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="tez-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-collections4-*.jar"/>
+        </copy>
+        <copy file="${output.jarfile.core}" tofile="${output.jarfile.backcompat-core-h3}"/>
+        <mkdir dir="${legacy.dir}" />
+        <move file="${output.jarfile.withouthadoop}" tofile="${output.jarfile.withouthadoop-h3}"/>
+    </target>
+
+    <target name="copyHadoop3LocalRuntimeDependencies" if="isHadoop3">
+        <mkdir dir="${lib.dir}/hadoop3-runtime" />
+        <copy todir="${lib.dir}/hadoop3-runtime">
+            <fileset dir="${ivy.lib.dir}" includes="hadoop-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-cli-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-configuration-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-collections-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-lang-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-codec-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-io-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="commons-logging-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="httpclient-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="httpcore-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="log4j-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="slf4j-*.jar"/>
+            <fileset dir="${ivy.lib.dir}" includes="re2j-*.jar"/>
+        </copy>
+    </target>
+
 
     <scriptdef name="propertyreset" language="javascript"
         description="Allows to assign @{property} new value">
@@ -1005,13 +1073,6 @@
 
     <target name="test-core-mrtez" description="run core tests on both mr and tez mode"
             depends="setWindowsPath,setLinuxPath,compile-test,jar,debugger.check,jackson-pig-3039-test-download">
-        <fail message="hadoopversion must be set to 2 when invoking test-core-mrtez">
-          <condition>
-            <not>
-              <equals arg1="${hadoopversion}" arg2="2" />
-            </not>
-          </condition>
-        </fail>
         <echo message="=======================" />
         <echo message="Running MR tests" />
         <echo message="=======================" />
@@ -1171,6 +1232,10 @@
     </target>
 
 
+    <target name="package-h23" depends="jar-h23, docs, api-report, piggybank" description="Create a Pig tar release">
+        <package-base/>
+    </target>
+
     <target name="package" depends="jar, docs, api-report, piggybank" description="Create a Pig tar release">
         <package-base/>
     </target>
@@ -1194,6 +1259,7 @@
         </copy>
 
         <copy file="${output.jarfile.backcompat-core-h2}" tofile="${tar.dist.dir}/${final.name}-core-h2.jar" failonerror="false"/>
+        <copy file="${output.jarfile.backcompat-core-h3}" tofile="${tar.dist.dir}/${final.name}-core-h3.jar" failonerror="false"/>
 
         <copy todir="${tar.dist.dir}/lib" file="contrib/piggybank/java/piggybank.jar"/>
 
@@ -1269,6 +1335,10 @@
     <!-- Make release packages                                              -->
     <!-- ================================================================== -->
     <target name="tar" depends="package" description="Source distribution">
+        <tar-base/>
+    </target>
+
+    <target name="tar-h23" depends="package-h23" description="Source distribution">
         <tar-base/>
     </target>
 
@@ -1735,8 +1805,9 @@
      </target>
 
      <target name="ivy-resolve" depends="ivy-init" unless="ivy.resolved" description="Resolve Ivy dependencies">
+       <loadproperties srcfile="${ivy.dir}/libraries-h${hadoopversion}.properties"/>
        <property name="ivy.resolved" value="true"/>
-       <echo>*** Ivy resolve with Hadoop ${hadoopversion} and HBase ${hbaseversion} ***</echo>
+       <echo>*** Ivy resolve with Hadoop ${hadoopversion} (${hadoop-common.version}) and HBase ${hbaseversion} (${hbase1.version}) ***</echo>
        <ivy:resolve log="${loglevel}" settingsRef="${ant.project.name}.ivy.settings" conf="compile"/>
        <ivy:report toDir="build/ivy/report"/>
      </target>

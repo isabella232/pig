@@ -117,10 +117,10 @@ public class HDataStorage implements DataStorage {
         if (fs instanceof DistributedFileSystem) {
             DistributedFileSystem dfs = (DistributedFileSystem) fs;
 
-            long rawCapacityBytes = dfs.getRawCapacity();
+            long rawCapacityBytes = dfs.getStatus().getCapacity();
             stats.put(RAW_CAPACITY_KEY, Long.valueOf(rawCapacityBytes).toString());
 
-            long rawUsedBytes = dfs.getRawUsed();
+            long rawUsedBytes = dfs.getStatus().getUsed();
             stats.put(RAW_USED_KEY, Long.valueOf(rawUsedBytes).toString());
         }
 

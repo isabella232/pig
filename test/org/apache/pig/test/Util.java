@@ -1482,7 +1482,7 @@ public class Util {
     }
 
     public static String findPigJarName() {
-        final String suffix = System.getProperty("hadoopversion").equals("20") ? "1" : "2";
+        final String suffix = System.getProperty("hadoopversion", "3");
         File baseDir = new File(".");
         String[] jarNames = baseDir.list(new FilenameFilter() {
             @Override

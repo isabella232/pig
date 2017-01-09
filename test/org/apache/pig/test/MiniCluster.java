@@ -84,6 +84,7 @@ public class MiniCluster extends MiniGenericCluster {
             m_dfs = new MiniDFSCluster(config, dataNodes, true, null);
             m_fileSys = m_dfs.getFileSystem();
             m_dfs_conf = m_dfs.getConfiguration(0);
+            m_dfs_conf.set("yarn.nodemanager.admin-env", m_dfs_conf.get("yarn.nodemanager.admin-env") + ",PATH=$PATH");
 
             //Create user home directory
             m_fileSys.mkdirs(m_fileSys.getWorkingDirectory());

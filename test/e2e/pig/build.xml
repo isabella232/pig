@@ -20,7 +20,7 @@
   <property name="pig.dir" value="${basedir}/../../.."/>
   <property name="pig.base.dir" value="${basedir}/../../.."/>
   <property name="ivy.dir" location="${pig.base.dir}/ivy" />
-  <loadproperties srcfile="${ivy.dir}/libraries.properties"/>
+  <loadproperties srcfile="${ivy.dir}/libraries-common.properties"/>
 
   <property name="piggybank.jar"
 	value="${pig.base.dir}/contrib/piggybank/java/piggybank.jar"/>

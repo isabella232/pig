@@ -136,7 +136,7 @@ public class TestErrorHandling {
         } catch(FrontendException ex) {
             System.out.println( ex.getCause().getMessage() );
             Assert.assertTrue( ex.getCause().getMessage().contains( "line 2, column 0" ) );
-            Assert.assertTrue( ex.getCause().getMessage().contains( "No FileSystem for scheme: fs2you" ) );
+            Assert.assertTrue( ex.getCause().getMessage().contains( "No FileSystem for scheme \"fs2you\"") );
             return;
         }
         Assert.fail( "Testcase should fail" );
