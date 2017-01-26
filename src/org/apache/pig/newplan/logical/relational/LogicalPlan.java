@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.io.ByteArrayOutputStream;
 
 import org.apache.pig.PigConstants;
 import org.apache.pig.PigException;
@@ -64,12 +63,10 @@ import org.apache.pig.validator.BlackAndWhitelistValidator;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 
 /**
  * LogicalPlan is the logical view of relational operations Pig will execute
@@ -162,23 +159,33 @@ public class LogicalPlan extends BaseOperatorPlan {
      * @throws FrontendException if signature can't be computed
      */
     public String getSignature() throws FrontendException {
-        String logicalPlanString = getLogicalPlanString();
-        return Integer.toString(logicalPlanString.hashCode());
+        // Use a streaming hash function. We use a murmur_32 function with a constant seed, 0.
+        HashFunction hf = Hashing.murmur3_32(0);
+
+        HashCode hashCode = getHashCodeOfLogicalPlan(this,hf);
+        return Integer.toString(hashCode.asInt());
     }
 
+    /**
+     * Used for Navigator integration - returns MD5 hash constructed from lp
+     * @return
+     * @throws FrontendException
+     */
     public String getHash() throws FrontendException {
         HashFunction hf = Hashing.md5();
-        Hasher h = hf.newHasher();
-        h.putString(getLogicalPlanString());
-        return h.hash().toString();
+
+        HashCode hashCode = getHashCodeOfLogicalPlan(this,hf);
+        return hashCode.toString();
     }
 
-    private String getLogicalPlanString() throws FrontendException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        LogicalPlanPrinter printer = new LogicalPlanPrinter(this, ps);
+    private static HashCode getHashCodeOfLogicalPlan(LogicalPlan lp, HashFunction hashFunction) throws FrontendException {
+        HashOutputStream hos = new HashOutputStream(hashFunction);
+        PrintStream ps = new PrintStream(hos);
+
+        LogicalPlanPrinter printer = new LogicalPlanPrinter(lp, ps);
         printer.visit();
-        return baos.toString();
+
+        return hos.getHashCode();
     }
 
     public void validate(PigContext pigContext, String scope, boolean skipInputOutputValidation)
