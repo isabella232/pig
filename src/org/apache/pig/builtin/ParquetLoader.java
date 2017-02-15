@@ -29,7 +29,7 @@ import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.util.JarManager;
 
 /**
- * Wrapper class which will delegate calls to parquet.pig.ParquetLoader
+ * Wrapper class which will delegate calls to org.apache.parquet.pig.ParquetLoader
  */
 public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDown {
 
@@ -40,7 +40,7 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
     public ParquetLoader(String requestedSchemaStr) throws FrontendException {
         Throwable exception = null;
         try {
-            Class parquetLoader = Class.forName("parquet.pig.ParquetLoader");
+            Class parquetLoader = Class.forName("org.apache.parquet.pig.ParquetLoader");
             Constructor constructor = parquetLoader.getConstructor(String.class);
 
             init((LoadMetadata) constructor.newInstance(requestedSchemaStr));
@@ -62,7 +62,7 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
 
       if(exception != null) {
           throw new FrontendException(String.format("Cannot instantiate class %s (%s)",
-            getClass().getName(), "parquet.pig.ParquetLoader"), 2259, exception);
+            getClass().getName(), "org.apache.parquet.pig.ParquetLoader"), 2259, exception);
       }
     }
     
@@ -73,7 +73,7 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
     @Override
     public void setLocation(String location, Job job) throws IOException {
         try {
-            JarManager.addDependencyJars(job, Class.forName("parquet.Version.class"));
+            JarManager.addDependencyJars(job, Class.forName("org.apache.parquet.Version.class"));
         } catch (ClassNotFoundException e) {
             throw new IOException("Runtime parquet dependency not found", e);
         }
