@@ -42,7 +42,9 @@ import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceLau
  */
 public class MiniCluster extends MiniGenericCluster {
     private static final File CONF_DIR = new File("build/classes");
-    private static final File CONF_FILE = new File(CONF_DIR, "hadoop-site.xml");
+    private static final File CORE_SITE_FILE = new File(CONF_DIR, "core-site.xml");
+    private static final File HDFS_SITE_FILE = new File(CONF_DIR, "hdfs-site.xml");
+    private static final File MAPRED_SITE_FILE = new File(CONF_DIR, "mapred-site.xml");
 
     protected MiniMRYarnCluster m_mr = null;
     private Configuration m_dfs_conf = null;
@@ -69,12 +71,12 @@ public class MiniCluster extends MiniGenericCluster {
             final int taskTrackers = 4;  // There will be 4 task tracker nodes
 
             System.setProperty("hadoop.log.dir", "build/test/logs");
-            // Create the dir that holds hadoop-site.xml file
-            // Delete if hadoop-site.xml exists already
+            // Create the dir that holds core-site.xml file
+            // Delete if core-site.xml exists already
             CONF_DIR.mkdirs();
-            if(CONF_FILE.exists()) {
-                CONF_FILE.delete();
-            }
+            deleteFileIfExists(CORE_SITE_FILE);
+            deleteFileIfExists(MAPRED_SITE_FILE);
+            deleteFileIfExists(HDFS_SITE_FILE);
 
             // Builds and starts the mini dfs and mapreduce clusters
             Configuration config = new Configuration();
@@ -93,7 +95,7 @@ public class MiniCluster extends MiniGenericCluster {
             m_mr.init(m_dfs_conf);
             m_mr.start();
 
-            // Write the necessary config info to hadoop-site.xml
+            // Write the necessary config info to core-site.xml
             m_mr_conf = new Configuration(m_mr.getConfig());
 
             m_conf = m_mr_conf;
@@ -113,10 +115,18 @@ public class MiniCluster extends MiniGenericCluster {
             m_conf.set("dfs.datanode.address", "0.0.0.0:0");
             m_conf.set("dfs.datanode.http.address", "0.0.0.0:0");
             m_conf.set("pig.jobcontrol.sleep", "100");
-            m_conf.writeXml(new FileOutputStream(CONF_FILE));
-            m_fileSys.copyFromLocalFile(new Path(CONF_FILE.getAbsoluteFile().toString()),
-                    new Path("/pigtest/conf/hadoop-site.xml"));
-            DistributedCache.addFileToClassPath(new Path("/pigtest/conf/hadoop-site.xml"), m_conf);
+            m_conf.writeXml(new FileOutputStream(CORE_SITE_FILE));
+            m_conf.writeXml(new FileOutputStream(MAPRED_SITE_FILE));
+            m_conf.writeXml(new FileOutputStream(HDFS_SITE_FILE));
+            m_fileSys.copyFromLocalFile(new Path(CORE_SITE_FILE.getAbsoluteFile().toString()),
+                    new Path("/pigtest/conf/core-site.xml"));
+            m_fileSys.copyFromLocalFile(new Path(MAPRED_SITE_FILE.getAbsoluteFile().toString()),
+                    new Path("/pigtest/conf/mapred-site.xml"));
+            m_fileSys.copyFromLocalFile(new Path(HDFS_SITE_FILE.getAbsoluteFile().toString()),
+                    new Path("/pigtest/conf/hdfs-site.xml"));
+            DistributedCache.addFileToClassPath(new Path("/pigtest/conf/core-site.xml"), m_conf);
+            DistributedCache.addFileToClassPath(new Path("/pigtest/conf/mapred-site.xml"), m_conf);
+            DistributedCache.addFileToClassPath(new Path("/pigtest/conf/hdfs-site.xml"), m_conf);
 
             System.err.println("XXX: Setting " + FileSystem.FS_DEFAULT_NAME_KEY + " to: " + m_conf.get(FileSystem.FS_DEFAULT_NAME_KEY));
             // Set the system properties needed by Pig
@@ -128,12 +138,18 @@ public class MiniCluster extends MiniGenericCluster {
         }
     }
 
+    private void deleteFileIfExists(File file) {
+        if(file.exists()) {
+            file.delete();
+        }
+    }
+
     @Override
     protected void shutdownMiniMrClusters() {
-        // Delete hadoop-site.xml on shutDown
-        if(CONF_FILE.exists()) {
-            CONF_FILE.delete();
-        }
+        // Delete config files on shutDown
+        deleteFileIfExists(CORE_SITE_FILE);
+        deleteFileIfExists(MAPRED_SITE_FILE);
+        deleteFileIfExists(HDFS_SITE_FILE);
         if (m_mr != null) { m_mr.stop(); }
         m_mr = null;
     }
