@@ -18,6 +18,7 @@ package org.apache.pig.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -128,10 +129,10 @@ public class TestHBaseStorage {
     public void tearDown() throws Exception {
         try {
             deleteAllRows(TESTTABLE_1);
-        } catch (IOException e) {}
+        } catch (UncheckedIOException e) {}
         try {
             deleteAllRows(TESTTABLE_2);
-        } catch (IOException e) {}
+        } catch (UncheckedIOException e) {}
         pig.shutdown();
     }
 
