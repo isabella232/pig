@@ -626,6 +626,8 @@
         <exclude org="org.eclipse.jetty.orbit" module="javax.mail.glassfish"/>
         <exclude org="org.eclipse.jetty.orbit" module="javax.activation"/>
         <exclude org="org.apache.hadoop" />
+        <exclude org="org.apache.avro" />
+        <exclude org="org.apache.curator" />
         <exclude org="com.esotericsoftware.kryo" />
         <exclude org="jline" module="jline"/>
         <exclude org="com.google.guava" />
