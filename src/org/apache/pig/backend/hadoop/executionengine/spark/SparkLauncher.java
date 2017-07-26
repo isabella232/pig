@@ -136,11 +136,10 @@ import org.apache.pig.tools.pigstats.spark.SparkPigStats;
 import org.apache.pig.tools.pigstats.spark.SparkPigStatusReporter;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.scheduler.JobLogger;
 import org.apache.spark.scheduler.StatsReportListener;
 
 import com.google.common.base.Joiner;
-
-import static org.apache.pig.backend.hadoop.executionengine.spark.SparkShims.SPARK_VERSION;
 
 /**
  * Main class that launches pig for Spark
@@ -153,7 +152,7 @@ public class SparkLauncher extends Launcher {
     // across jobs, because a
     // new SparkLauncher gets created for each job.
     private static JavaSparkContext sparkContext = null;
-    private static JobStatisticCollector jobStatisticCollector = new JobStatisticCollector();
+    private static JobMetricsListener jobMetricsListener = new JobMetricsListener();
     private String jobGroupID;
     private PigContext pigContext = null;
     private JobConf jobConf = null;
@@ -177,7 +176,7 @@ public class SparkLauncher extends Launcher {
         sparkStats.initialize(pigContext, sparkplan, jobConf);
         PigStats.start(sparkStats);
 
-        startSparkIfNeeded(jobConf, pigContext);
+        startSparkIfNeeded(pigContext);
 
         jobGroupID = String.format("%s-%s",sparkContext.getConf().getAppId(),
                 UUID.randomUUID().toString());
@@ -185,7 +184,7 @@ public class SparkLauncher extends Launcher {
 
         sparkContext.setJobGroup(jobGroupID, "Pig query to Spark cluster",
                 false);
-        jobStatisticCollector.reset();
+        jobMetricsListener.reset();
 
         this.currentDirectoryPath = Paths.get(".").toAbsolutePath()
                 .normalize().toString()
@@ -232,7 +231,7 @@ public class SparkLauncher extends Launcher {
         }
         uploadResources(sparkplan);
 
-        new JobGraphBuilder(sparkplan, convertMap, sparkStats, sparkContext, jobStatisticCollector, jobGroupID, jobConf, pigContext).visit();
+        new JobGraphBuilder(sparkplan, convertMap, sparkStats, sparkContext, jobMetricsListener, jobGroupID, jobConf, pigContext).visit();
         cleanUpSparkJob(sparkStats);
         sparkStats.finish();
         resetUDFContext();
@@ -540,7 +539,7 @@ public class SparkLauncher extends Launcher {
      * Only one SparkContext may be active per JVM (SPARK-2243). When multiple threads start SparkLaucher,
      * the static member sparkContext should be initialized only once
      */
-    private static synchronized void startSparkIfNeeded(JobConf jobConf, PigContext pc) throws PigException {
+    private static synchronized void startSparkIfNeeded(PigContext pc) throws PigException {
         if (sparkContext == null) {
             String master = null;
             if (pc.getExecType().isLocal()) {
@@ -595,9 +594,9 @@ public class SparkLauncher extends Launcher {
             checkAndConfigureDynamicAllocation(master, sparkConf);
 
             sparkContext = new JavaSparkContext(sparkConf);
-            jobConf.set(SPARK_VERSION, sparkContext.version());
-            SparkShims.getInstance().addSparkListener(sparkContext.sc(), jobStatisticCollector.getSparkListener());
-            SparkShims.getInstance().addSparkListener(sparkContext.sc(), new StatsReportListener());
+            sparkContext.sc().addSparkListener(new StatsReportListener());
+            sparkContext.sc().addSparkListener(new JobLogger());
+            sparkContext.sc().addSparkListener(jobMetricsListener);
         }
     }
 

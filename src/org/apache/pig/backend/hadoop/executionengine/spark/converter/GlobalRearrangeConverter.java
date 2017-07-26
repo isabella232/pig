@@ -26,7 +26,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pig.backend.executionengine.ExecException;
-import org.apache.pig.backend.hadoop.executionengine.spark.FlatMapFunctionAdapter;
 import org.apache.pig.backend.hadoop.executionengine.spark.SparkPigContext;
 import org.apache.pig.backend.hadoop.executionengine.spark.SparkUtil;
 import org.apache.pig.backend.hadoop.executionengine.spark.operator.POGlobalRearrangeSpark;
@@ -35,6 +34,7 @@ import org.apache.pig.data.TupleFactory;
 import org.apache.spark.HashPartitioner;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.rdd.CoGroupedRDD;
 import org.apache.spark.rdd.RDD;
@@ -127,7 +127,7 @@ public class GlobalRearrangeConverter implements
     }
 
     private static class RemoveValueFunction implements
-            FlatMapFunctionAdapter<Iterator<Tuple2<Tuple, Object>>, Tuple>, Serializable {
+            FlatMapFunction<Iterator<Tuple2<Tuple, Object>>, Tuple>, Serializable {
 
         private class Tuple2TransformIterable implements Iterable<Tuple> {
 
@@ -148,8 +148,8 @@ public class GlobalRearrangeConverter implements
         }
 
         @Override
-        public Iterator<Tuple> call(Iterator<Tuple2<Tuple, Object>> input) {
-            return new Tuple2TransformIterable(input).iterator();
+        public Iterable<Tuple> call(Iterator<Tuple2<Tuple, Object>> input) {
+            return new Tuple2TransformIterable(input);
         }
     }
 
@@ -330,7 +330,7 @@ public class GlobalRearrangeConverter implements
                             }
                         }
                     });
-                    ++i;
+                    ++ i;
                 }
 
                 Tuple out = tf.newTuple(2);

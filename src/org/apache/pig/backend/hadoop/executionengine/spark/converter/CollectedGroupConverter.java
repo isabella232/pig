@@ -24,10 +24,9 @@ import java.util.List;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.Result;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POCollectedGroup;
-import org.apache.pig.backend.hadoop.executionengine.spark.FlatMapFunctionAdapter;
-import org.apache.pig.backend.hadoop.executionengine.spark.SparkShims;
 import org.apache.pig.backend.hadoop.executionengine.spark.SparkUtil;
 import org.apache.pig.data.Tuple;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.rdd.RDD;
 
 @SuppressWarnings({"serial"})
@@ -40,40 +39,48 @@ public class CollectedGroupConverter implements RDDConverter<Tuple, Tuple, POCol
         RDD<Tuple> rdd = predecessors.get(0);
         CollectedGroupFunction collectedGroupFunction
                 = new CollectedGroupFunction(physicalOperator);
-        return rdd.toJavaRDD().mapPartitions(SparkShims.getInstance().flatMapFunction(collectedGroupFunction), true)
+        return rdd.toJavaRDD().mapPartitions(collectedGroupFunction, true)
                 .rdd();
     }
 
     private static class CollectedGroupFunction
-            implements FlatMapFunctionAdapter<Iterator<Tuple>, Tuple> {
+            implements FlatMapFunction<Iterator<Tuple>, Tuple> {
 
         private POCollectedGroup poCollectedGroup;
 
         public long current_val;
+        public boolean proceed;
 
         private CollectedGroupFunction(POCollectedGroup poCollectedGroup) {
             this.poCollectedGroup = poCollectedGroup;
             this.current_val = 0;
         }
 
-        @Override
-        public Iterator<Tuple> call(final Iterator<Tuple> input) {
-            return new OutputConsumerIterator(input) {
+        public Iterable<Tuple> call(final Iterator<Tuple> input) {
+
+            return new Iterable<Tuple>() {
 
                 @Override
-                protected void attach(Tuple tuple) {
-                    poCollectedGroup.setInputs(null);
-                    poCollectedGroup.attachInput(tuple);
-                }
+                public Iterator<Tuple> iterator() {
 
-                @Override
-                protected Result getNextResult() throws ExecException {
-                    return poCollectedGroup.getNextTuple();
-                }
+                    return new OutputConsumerIterator(input) {
 
-                @Override
-                protected void endOfInput() {
-                    poCollectedGroup.setEndOfInput(true);
+                        @Override
+                        protected void attach(Tuple tuple) {
+                            poCollectedGroup.setInputs(null);
+                            poCollectedGroup.attachInput(tuple);
+                        }
+
+                        @Override
+                        protected Result getNextResult() throws ExecException {
+                            return poCollectedGroup.getNextTuple();
+                        }
+
+                        @Override
+                        protected void endOfInput() {
+                            poCollectedGroup.setEndOfInput(true);
+                        }
+                    };
                 }
             };
         }

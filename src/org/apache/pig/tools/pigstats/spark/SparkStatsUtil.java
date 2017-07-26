@@ -26,7 +26,7 @@ import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOpe
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POSplit;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POStore;
 import org.apache.pig.backend.hadoop.executionengine.spark.JobGraphBuilder;
-import org.apache.pig.backend.hadoop.executionengine.spark.JobStatisticCollector;
+import org.apache.pig.backend.hadoop.executionengine.spark.JobMetricsListener;
 import org.apache.pig.backend.hadoop.executionengine.spark.operator.NativeSparkOperator;
 import org.apache.pig.backend.hadoop.executionengine.spark.plan.SparkOperator;
 import org.apache.pig.tools.pigstats.PigStatsUtil;
@@ -44,7 +44,7 @@ public class SparkStatsUtil {
 
     public static void waitForJobAddStats(int jobID,
                                           POStore poStore, SparkOperator sparkOperator,
-                                          JobStatisticCollector jobStatisticCollector,
+                                          JobMetricsListener jobMetricsListener,
                                           JavaSparkContext sparkContext,
                                           SparkPigStats sparkPigStats)
             throws InterruptedException {
@@ -55,17 +55,20 @@ public class SparkStatsUtil {
         // "event bus" thread updating it's internal listener and
         // this driver thread calling SparkStatusTracker.
         // To workaround this, we will wait for this job to "finish".
-        jobStatisticCollector.waitForJobToEnd(jobID);
-        sparkPigStats.addJobStats(poStore, sparkOperator, jobID, jobStatisticCollector,
+        jobMetricsListener.waitForJobToEnd(jobID);
+        sparkPigStats.addJobStats(poStore, sparkOperator, jobID, jobMetricsListener,
                 sparkContext);
-        jobStatisticCollector.cleanup(jobID);
+        jobMetricsListener.cleanup(jobID);
     }
 
     public static void addFailJobStats(String jobID,
                                        POStore poStore, SparkOperator sparkOperator,
                                        SparkPigStats sparkPigStats,
                                        Exception e) {
-        sparkPigStats.addFailJobStats(poStore, sparkOperator, jobID, null, null, e);
+        JobMetricsListener jobMetricsListener = null;
+        JavaSparkContext sparkContext = null;
+        sparkPigStats.addFailJobStats(poStore, sparkOperator, jobID, jobMetricsListener,
+                sparkContext, e);
     }
 
     public static String getCounterName(POStore store) {

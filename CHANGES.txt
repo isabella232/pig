@@ -36,8 +36,6 @@ PIG-5067: Revisit union on numeric type and chararray to bytearray (knoguchi)
  
 IMPROVEMENTS
 
-PIG-5157: Upgrade to Spark 2.0 (nkollar via liyunzhang)
-
 PIG-5184: set command to view value of a variable (daijy via rohini)
 
 PIG-4059: Pig On Spark
@@ -112,10 +110,6 @@ PIG-2768: Fix org.apache.hadoop.conf.Configuration deprecation warnings for Hado
 OPTIMIZATIONS
  
 BUG FIXES
-
-PIG-5246: Modify bin/pig about SPARK_HOME, SPARK_ASSEMBLY_JAR after upgrading spark to 2 (liyunzhang)
-
-PIG-5274: TestEvalPipelineLocal#testSetLocationCalledInFE is failing in spark mode after PIG-5157 (nkollar via szita)
 
 PIG-5248: Fix TestCombiner#testGroupByLimit after PigOnSpark merge (rohini)
 

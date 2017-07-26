@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
-import org.apache.pig.backend.hadoop.executionengine.spark.FlatMapFunctionAdapter;
-import org.apache.pig.backend.hadoop.executionengine.spark.SparkShims;
-import org.apache.pig.backend.hadoop.executionengine.spark.SparkUtil;
 import scala.Tuple2;
 
 import org.apache.commons.logging.Log;
@@ -33,11 +30,13 @@ import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.POStatus;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.Result;
 import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POPackage;
+import org.apache.pig.backend.hadoop.executionengine.spark.SparkUtil;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.io.NullableTuple;
 import org.apache.pig.impl.io.PigNullableWritable;
 import org.apache.spark.Partitioner;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.rdd.RDD;
 
 /**
@@ -57,13 +56,13 @@ public class SecondaryKeySortUtil {
         JavaPairRDD<IndexedKey, Tuple> sorted = pairRDD.repartitionAndSortWithinPartitions(
                 new IndexedKeyPartitioner(partitionNums));
         //Package tuples with same indexedkey as the result: (key,(val1,val2,val3,...))
-        return sorted.mapPartitions(SparkShims.getInstance().flatMapFunction(new AccumulateByKey(pkgOp)), true).rdd();
+        return sorted.mapPartitions(new AccumulateByKey(pkgOp), true).rdd();
     }
 
     //Package tuples with same indexedkey as the result: (key,(val1,val2,val3,...))
     //Send (key,Iterator) to POPackage, use POPackage#getNextTuple to get the result
-    private static class AccumulateByKey
-            implements FlatMapFunctionAdapter<Iterator<Tuple2<IndexedKey, Tuple>>, Tuple>, Serializable {
+    private static class AccumulateByKey implements FlatMapFunction<Iterator<Tuple2<IndexedKey, Tuple>>, Tuple>,
+            Serializable {
         private POPackage pkgOp;
 
         public AccumulateByKey(POPackage pkgOp) {
@@ -71,7 +70,7 @@ public class SecondaryKeySortUtil {
         }
 
         @Override
-        public Iterator<Tuple> call(final Iterator<Tuple2<IndexedKey, Tuple>> it) {
+        public Iterable<Tuple> call(final Iterator<Tuple2<IndexedKey, Tuple>> it) throws Exception {
             return new Iterable<Tuple>() {
                 Object curKey = null;
                 ArrayList curValues = new ArrayList();
@@ -133,7 +132,7 @@ public class SecondaryKeySortUtil {
                         }
                     };
                 }
-            }.iterator();
+            };
         }
 
         private Tuple restructTuple(final Object curKey, final ArrayList<Tuple> curValues) {
