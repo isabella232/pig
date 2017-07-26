@@ -228,7 +228,7 @@
     <property name="ivy.repo.dir" value="${user.home}/ivyrepo" />
     <property name="ivy.dir" location="ivy" />
     <property name="loglevel" value="quiet" />
-    <loadproperties srcfile="${ivy.dir}/libraries.properties" />
+    <loadproperties srcfile="${ivy.dir}/libraries-common.properties" />
 
     <!--
       Hadoop master version
