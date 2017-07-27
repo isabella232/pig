@@ -107,5 +107,6 @@
     <module organisation="org.apache.avro" name=".*" resolver="cloudera" />
     <module organisation="org.apache.hive" name=".*" resolver="cloudera" />
     <module organisation="org.apache.hive.shims" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.spark" name=".*" resolver="cloudera" />
   </modules>
 </ivysettings>

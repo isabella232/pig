@@ -228,7 +228,6 @@
     <property name="ivy.repo.dir" value="${user.home}/ivyrepo" />
     <property name="ivy.dir" location="ivy" />
     <property name="loglevel" value="quiet" />
-    <loadproperties srcfile="${ivy.dir}/libraries.properties" />
 
     <!--
       Hadoop master version
@@ -615,10 +614,19 @@
     <!-- Build sources                                                      -->
     <!-- ================================================================== -->
     <target name="compile" depends="cc-compile, gen" description="Compile all artifacts">
+        <if>
+            <equals arg1="${sparkversion}" arg2="1" />
+            <then>
+                <property name="sparkversion.value" value="${spark1.version}"/>
+            </then>
+            <else>
+                <property name="sparkversion.value" value="${spark2.version}"/>
+            </else>
+        </if>
         <echo>*** Building Main Sources ***</echo>
         <echo>*** To compile with all warnings enabled, supply -Dall.warnings=1 on command line ***</echo>
         <echo>*** Else, you will only be warned about deprecations ***</echo>
-        <echo>*** Hadoop version used: ${hadoopversion} (${hadoop-common.version}); HBase version used: ${hbaseversion} (${hbase1.version}) ; Spark version used: ${sparkversion} ***</echo>
+        <echo>*** Hadoop version used: ${hadoopversion} (${hadoop-common.version}); HBase version used: ${hbaseversion} (${hbase1.version}) ; Spark version used: ${sparkversion} (${sparkversion.value}) ***</echo>
         <echo>*** javac version used: ${javac.version}</echo>
         <compileSources sources="${src.dir};${src.gen.dir};${src.lib.dir}/bzip2;${src.shims.dir};${src.hive.shims.dir}"
             excludes="${src.exclude.dir}" dist="${build.classes}" cp="classpath" warnings="${javac.args.warnings}" />
@@ -925,10 +933,10 @@
         <jar update="yes" jarfile="${output.jarfile.core}">
             <zipfileset src="${basedir}/_pig-shims.jar" includes="**/Spark2*.class"/>
         </jar>
-        <jar update="yes" jarfile="${output.jarfile.backcompat-core-h2}">
+        <jar update="yes" jarfile="${output.jarfile.backcompat-core-h3}">
             <zipfileset src="${basedir}/_pig-shims.jar" includes="**/Spark2*.class"/>
         </jar>
-        <jar update="yes" jarfile="${output.jarfile.withouthadoop-h2}">
+        <jar update="yes" jarfile="${output.jarfile.withouthadoop-h3}">
             <zipfileset src="${basedir}/_pig-shims.jar" includes="**/Spark2*.class"/>
         </jar>
         <delete file="${basedir}/_pig-shims.jar"/>
@@ -1855,7 +1863,17 @@
      <target name="ivy-resolve" depends="ivy-init" unless="ivy.resolved" description="Resolve Ivy dependencies">
        <loadproperties srcfile="${ivy.dir}/libraries-h${hadoopversion}.properties"/>
        <property name="ivy.resolved" value="true"/>
-       <echo>*** Ivy resolve with Hadoop ${hadoopversion} (${hadoop-common.version}), Spark ${sparkversion} and HBase ${hbaseversion} (${hbase1.version}) ***</echo>
+         <if>
+             <equals arg1="${sparkversion}" arg2="1" />
+             <then>
+                 <property name="sparkversion.value" value="${spark1.version}"/>
+             </then>
+             <else>
+                 <property name="sparkversion.value" value="${spark2.version}"/>
+             </else>
+         </if>
+
+         <echo>*** Ivy resolve with Hadoop ${hadoopversion} (${hadoop-common.version}), Spark ${sparkversion} (${sparkversion.value}) and HBase ${hbaseversion} (${hbase1.version}) ***</echo>
        <ivy:resolve log="${loglevel}" settingsRef="${ant.project.name}.ivy.settings" conf="compile"/>
        <ivy:report toDir="build/ivy/report"/>
      </target>
