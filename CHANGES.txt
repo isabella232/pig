@@ -1025,6 +1025,8 @@ PIG-4657: [Pig on Tez] Optimize GroupBy and Distinct key comparison (rohini)
  
 BUG FIXES
 
+PIG-5276: building "jar" should not call "clean" (nkollar via szita)
+
 PIG-4335: Pig release tarball miss tez classes (daijy)
 
 PIG-4325: StackOverflow when spilling InternalCachedBag (daijy)
