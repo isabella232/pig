@@ -30,6 +30,8 @@ OPTIMIZATIONS
 
 BUG FIXES
 
+PIG-5284: Fix flakyness introduced by PIG-3655 (szita)
+
 PIG-3655: BinStorage and InterStorage approach to record markers is broken (szita)
 
 PIG-5283: Configuration is not passed to SparkPigSplits on the backend (szita)
