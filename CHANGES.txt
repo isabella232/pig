@@ -18,6 +18,28 @@
 
 Pig Change Log
 
+Trunk (unreleased changes)
+
+INCOMPATIBLE CHANGES
+
+IMPROVEMENTS
+
+PIG-5157: Upgrade to Spark 2.0 (nkollar via liyunzhang)
+
+OPTIMIZATIONS
+
+BUG FIXES
+
+PIG-5276: building "jar" should not call "clean" (nkollar via szita)
+
+PIG-5246: Modify bin/pig about SPARK_HOME, SPARK_ASSEMBLY_JAR after upgrading spark to 2 (liyunzhang)
+
+PIG-5274: TestEvalPipelineLocal#testSetLocationCalledInFE is failing in spark mode after PIG-5157 (nkollar via szita)
+
+Release 0.17.1 (unreleased)
+
+BUG FIXES
+
 Release 0.17.0
  
 INCOMPATIBLE CHANGES
@@ -110,10 +132,6 @@ PIG-2768: Fix org.apache.hadoop.conf.Configuration deprecation warnings for Hado
 OPTIMIZATIONS
  
 BUG FIXES
-
-PIG-5246: Modify bin/pig about SPARK_HOME, SPARK_ASSEMBLY_JAR after upgrading spark to 2 (liyunzhang)
-
-PIG-5274: TestEvalPipelineLocal#testSetLocationCalledInFE is failing in spark mode after PIG-5157 (nkollar via szita)
 
 PIG-5248: Fix TestCombiner#testGroupByLimit after PigOnSpark merge (rohini)
 
@@ -1024,8 +1042,6 @@ PIG-4657: [Pig on Tez] Optimize GroupBy and Distinct key comparison (rohini)
 
  
 BUG FIXES
-
-PIG-5276: building "jar" should not call "clean" (nkollar via szita)
 
 PIG-4335: Pig release tarball miss tez classes (daijy)
 
