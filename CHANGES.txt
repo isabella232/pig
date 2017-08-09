@@ -30,6 +30,8 @@ OPTIMIZATIONS
 
 BUG FIXES
 
+PIG-5283: Configuration is not passed to SparkPigSplits on the backend (szita)
+
 PIG-5276: building "jar" should not call "clean" (nkollar via szita)
 
 PIG-5246: Modify bin/pig about SPARK_HOME, SPARK_ASSEMBLY_JAR after upgrading spark to 2 (liyunzhang)
