@@ -19,6 +19,7 @@ package org.apache.pig.builtin;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.mapreduce.Job;
@@ -33,6 +34,8 @@ import org.apache.pig.impl.util.JarManager;
  */
 public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDown {
 
+    private static final String PARQUET_LOADER_FQCN = "org.apache.parquet.pig.ParquetLoader";
+
     public ParquetLoader() throws FrontendException {
         this(null);
     }
@@ -40,7 +43,7 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
     public ParquetLoader(String requestedSchemaStr) throws FrontendException {
         Throwable exception = null;
         try {
-            Class parquetLoader = Class.forName("org.apache.parquet.pig.ParquetLoader");
+            Class parquetLoader = Class.forName(PARQUET_LOADER_FQCN);
             Constructor constructor = parquetLoader.getConstructor(String.class);
 
             init((LoadMetadata) constructor.newInstance(requestedSchemaStr));
@@ -62,7 +65,7 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
 
       if(exception != null) {
           throw new FrontendException(String.format("Cannot instantiate class %s (%s)",
-            getClass().getName(), "org.apache.parquet.pig.ParquetLoader"), 2259, exception);
+            getClass().getName(), PARQUET_LOADER_FQCN), 2259, exception);
       }
     }
     
@@ -73,7 +76,7 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
     @Override
     public void setLocation(String location, Job job) throws IOException {
         try {
-            JarManager.addDependencyJars(job, Class.forName("org.apache.parquet.Version.class"));
+            JarManager.addDependencyJars(job, Class.forName("org.apache.parquet.Version"));
         } catch (ClassNotFoundException e) {
             throw new IOException("Runtime parquet dependency not found", e);
         }
@@ -90,5 +93,17 @@ public class ParquetLoader extends LoadFuncMetadataWrapper implements LoadPushDo
             throws FrontendException {
         return ((LoadPushDown)super.loadFunc()).pushProjection(requiredFieldList);
     }
-    
+
+    @Override
+    public List<String> getShipFiles() {
+        List<Class> classList = new LinkedList<>();
+        try {
+            classList.add(Class.forName(PARQUET_LOADER_FQCN));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(String.format("Cannot find class %s (%s)",
+                    getClass().getName(), PARQUET_LOADER_FQCN), e);
+        }
+        return FuncUtils.getShipFiles(classList);
+    }
+
 }

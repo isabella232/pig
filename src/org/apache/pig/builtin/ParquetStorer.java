@@ -17,22 +17,27 @@
 package org.apache.pig.builtin;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.pig.StoreFuncMetadataWrapper;
 import org.apache.pig.StoreMetadata;
+import org.apache.pig.StoreResources;
 import org.apache.pig.impl.logicalLayer.FrontendException;
 import org.apache.pig.impl.util.JarManager;
 
 /**
  * Wrapper class which will delegate calls to org.apache.parquet.pig.ParquetStorer
  */
-public class ParquetStorer extends StoreFuncMetadataWrapper {
+public class ParquetStorer extends StoreFuncMetadataWrapper implements StoreResources {
+
+    private static final String PARQUET_STORER_FQCN = "org.apache.parquet.pig.ParquetStorer";
 
     public ParquetStorer() throws FrontendException {
         Throwable exception = null;
         try {
-            init((StoreMetadata) Class.forName("org.apache.parquet.pig.ParquetStorer").newInstance());
+            init((StoreMetadata) Class.forName(PARQUET_STORER_FQCN).newInstance());
         }
         // if compile time dependency not found at runtime
         catch (NoClassDefFoundError e) {
@@ -47,7 +52,7 @@ public class ParquetStorer extends StoreFuncMetadataWrapper {
 
         if(exception != null) {
             throw new FrontendException(String.format("Cannot instantiate class %s (%s)",
-              getClass().getName(), "org.apache.parquet.pig.ParquetStorer"), 2259, exception);
+              getClass().getName(), PARQUET_STORER_FQCN), 2259, exception);
         }
     }
     
@@ -61,11 +66,28 @@ public class ParquetStorer extends StoreFuncMetadataWrapper {
     @Override
     public void setStoreLocation(String location, Job job) throws IOException {
       try {
-          JarManager.addDependencyJars(job, Class.forName("org.apache.parquet.Version.class"));
+          JarManager.addDependencyJars(job, Class.forName("org.apache.parquet.Version"));
       } catch (ClassNotFoundException e) {
           throw new IOException("Runtime parquet dependency not found", e);
       }
       super.setStoreLocation(location, job);
     }
-    
+
+    @Override
+    public List<String> getCacheFiles() {
+        return null;
+    }
+
+    @Override
+    public List<String> getShipFiles() {
+        List<Class> classList = new LinkedList<>();
+        try {
+            classList.add(Class.forName(PARQUET_STORER_FQCN));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(String.format("Cannot find class %s (%s)",
+                    getClass().getName(), PARQUET_STORER_FQCN), e);
+        }
+        return FuncUtils.getShipFiles(classList);
+    }
+
 }
