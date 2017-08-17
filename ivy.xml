@@ -270,6 +270,8 @@
       <exclude org="org.apache.hadoop" module="hadoop-yarn-server-common" />
       <exclude org="org.apache.hadoop" module="hadoop-yarn-common" />
       <exclude org="org.apache.hadoop" module="hadoop-yarn-api" />
+      <exclude org="org.apache.hadoop" module="hadoop-yarn-registry" />
+
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-yarn-server-resourcemanager" 
       rev="${hadoop-mapreduce.version}" conf="hadoop2->master;hadoop3->master">
