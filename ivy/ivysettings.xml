@@ -102,6 +102,7 @@
     <module organisation="org.apache.pig" name=".*" resolver="internal"/>
     <module organisation="com.cloudera.*" name=".*" resolver="cloudera" />
     <module organisation="org.apache.hadoop" name=".*" resolver="cloudera" />
+    <module organisation="org.apache.hbase.thirdparty" name=".*" resolver="external" />
     <module organisation="org.apache.hbase" name=".*" resolver="cloudera" />
     <module organisation="org.apache.zookeeper" name=".*" resolver="cloudera" />
     <module organisation="org.apache.avro" name=".*" resolver="cloudera" />
