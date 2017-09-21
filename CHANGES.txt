@@ -24,6 +24,8 @@ INCOMPATIBLE CHANGES
 
 IMPROVEMENTS
 
+PIG-5298: Verify if org.mortbay.jetty is removable (nkollar via szita)
+
 PIG-5157: Upgrade to Spark 2.0 (nkollar via liyunzhang)
 
 OPTIMIZATIONS

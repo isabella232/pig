@@ -118,16 +118,12 @@
       conf="hadoop2->master;hadoop3->master"/>
     <dependency org="aopalliance" name="aopalliance" rev="${aopalliance.version}"
       conf="hadoop2->master;hadoop3->master"/>
-    <dependency org="org.mortbay.jetty" name="jsp-2.1" rev="${jasper.version}"
-      conf="hadoop2->master;hadoop3->master"/>
-    <dependency org="org.mortbay.jetty" name="jsp-api-2.1" rev="${jasper.version}"
+    <dependency org="org.glassfish" name="javax.el" rev="${glassfish.el.version}"
       conf="hadoop2->master;hadoop3->master"/>
     <dependency org="log4j" name="log4j" rev="${log4j.version}"
       conf="compile->master"/>
     <dependency org="com.google.re2j" name="re2j" rev="${re2j.version}"
       conf="hadoop3->master" />
-    <dependency org="org.mortbay.jetty" name="jetty-sslengine" rev="${jetty.version}"
-      conf="hadoop3->master"/>
     <dependency org="com.codahale.metrics" name="metrics-core" rev="${codahale.metrics-core.version}"
       conf="hadoop3->master"/>
 
@@ -280,21 +276,21 @@
       <exclude org="org.slf4j" module="log4j12"/>
       <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
-    <dependency org="org.apache.hadoop" name="hadoop-yarn-client"
+    <dependency org="org.apache.hadoop" name="hadoop-yarn-client" 
       rev="${hadoop-mapreduce.version}" conf="hadoop2->master;hadoop3->master">
       <exclude org="org.slf4j" module="slf4j"/>
       <exclude org="org.slf4j" module="slf4j-api"/>
       <exclude org="org.slf4j" module="log4j12"/>
       <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
-    <dependency org="org.apache.hadoop" name="hadoop-yarn-server-applicationhistoryservice"
+    <dependency org="org.apache.hadoop" name="hadoop-yarn-server-applicationhistoryservice" 
       rev="${hadoop-mapreduce.version}" conf="hadoop2->master;hadoop3->master">
       <exclude org="org.slf4j" module="slf4j"/>
       <exclude org="org.slf4j" module="slf4j-api"/>
       <exclude org="org.slf4j" module="log4j12"/>
       <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
-    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-hs"
+    <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-hs" 
       rev="${hadoop-mapreduce.version}" conf="hadoop2->master;hadoop3->master">
       <exclude org="org.slf4j" module="slf4j"/>
       <exclude org="org.slf4j" module="slf4j-api"/>
@@ -321,18 +317,6 @@
       <exclude org="org.slf4j" module="slf4j-log4j12" />
     </dependency>
 
-    <dependency org="org.mortbay.jetty" name="jetty" rev="${jetty.version}"
-      conf="compile->master">
-      <artifact name="jetty" ext="jar" />
-    </dependency>
-    <dependency org="org.mortbay.jetty" name="jetty-util" rev="${jetty.version}"
-      conf="compile->master"/>
-    <dependency org="org.mortbay.jetty" name="jsp-api-2.1" rev="${jetty-jsp.version}"
-      conf="compile->master"/>
-    <dependency org="org.mortbay.jetty" name="jsp-2.1" rev="${jetty-jsp.version}"
-      conf="compile->master"/>
-    <dependency org="org.mortbay.jetty" name="servlet-api-2.5" rev="${jetty-jsp.version}"
-      conf="compile->master"/>
     <dependency org="commons-logging" name="commons-logging" rev="${commons-logging.version}"
       conf="compile->master;checkstyle->master"/>
     <dependency org="org.slf4j" name="slf4j-log4j12" rev="${slf4j-log4j12.version}"
