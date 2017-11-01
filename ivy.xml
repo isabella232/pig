@@ -411,6 +411,7 @@
       <exclude org="com.sun.jersey" module="jersey-core"/>
       <exclude org="com.sun.jersey" module="jersey-server"/>
       <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="com.fasterxml.jackson.core" module="*"/>
       <exclude org="asm" module="asm"/>
 
       <exclude org="org.apache.curator" module="*"/>
