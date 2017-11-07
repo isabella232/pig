@@ -79,6 +79,12 @@
       <artifactId>hbase-client</artifactId>
       <classifier>tests</classifier>
       <version>${cdh.hbase.version}</version>
+      <exclusions>
+        <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
