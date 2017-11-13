@@ -31,7 +31,6 @@ hadoop-test.version=org.apache.hadoop:hadoop-test.version
 javacc.version=net.java.dev.javacc:javacc.version
 jetty-util.version=org.mortbay.jetty:jetty-util.version
 jline.version=jline:jline.version
-jsch.version=com.jcraft:jsch.version
 junit.version=junit:junit.version
 jdiff.version=jdiff:jdiff.version
 

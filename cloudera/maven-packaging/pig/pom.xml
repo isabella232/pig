@@ -154,17 +154,6 @@
       </exclusions>
    </dependency>
    <dependency>
-     <groupId>com.jcraft</groupId>
-     <artifactId>jsch</artifactId>
-     <version>${cdh.jsch.version}</version>
-     <exclusions>
-       <exclusion>
-         <groupId>com.jcraft</groupId>
-         <artifactId>zlib</artifactId>
-       </exclusion>
-     </exclusions>
-   </dependency>
-   <dependency>
      <groupId>jline</groupId>
      <artifactId>jline</artifactId>
       <version>${cdh.jline.version}</version>
