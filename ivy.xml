@@ -660,6 +660,7 @@
     <dependency org="org.apache.spark" name="spark-yarn_2.11" rev="${spark2.version}" conf="spark2->default">
       <exclude org="org.apache.hadoop" />
     </dependency>
+    <dependency org="com.fasterxml.jackson.module" name="jackson-module-scala_2.11" rev="2.7.8" conf="spark2->default"/>
 
     <dependency org="asm" name="asm" rev="${asm.version}" conf="compile->master"/>
     <dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="spark1->default;spark2->default"/>
