@@ -44,11 +44,6 @@
       <version>${cdh.xmlenc.version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>${cdh.commons-httpclient.version}</version>
-    </dependency>
-    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>${cdh.commons-codec.version}</version>
