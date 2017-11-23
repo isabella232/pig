@@ -54,11 +54,6 @@
       <version>${cdh.commons-net.version}</version>
     </dependency>
     <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>jasper-runtime</artifactId>
-      <version>${cdh.jasper.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-client</artifactId>
       <version>${cdh.hbase.version}</version>
@@ -80,11 +75,6 @@
             <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>jasper-compiler</artifactId>
-      <version>${cdh.jasper.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-el</groupId>
