@@ -436,6 +436,21 @@
       <exclude org="asm" module="asm"/>
     </dependency>
 
+    <dependency org="org.apache.hbase" name="hbase-zookeeper" rev="${hbase1.version}" conf="hbase1->master">
+      <artifact name="hbase-zookeeper" type="jar"/>
+      <artifact name="hbase-zookeeper" type="test-jar" ext="jar" m:classifier="tests"/>
+      <exclude org="org.apache.hadoop" module="hadoop-core"/>
+      <exclude org="stax" module="stax-api" />
+      <exclude org="javax.xml.bind" module="jaxb-api" />
+      <exclude org="javax.ws.rs" module="jsr311-api" />
+      <exclude org="tomcat" module="jasper-runtime"/>
+      <exclude org="tomcat" module="jasper-compiler"/>
+      <exclude org="com.sun.jersey" module="jersey-core"/>
+      <exclude org="com.sun.jersey" module="jersey-server"/>
+      <exclude org="com.sun.jersey" module="jersey-json"/>
+      <exclude org="asm" module="asm"/>
+    </dependency>
+
     <dependency org="org.apache.hbase" name="hbase-server" rev="${hbase1.version}" conf="hbase1->master">
       <artifact name="hbase-server" type="jar"/>
       <artifact name="hbase-server" type="test-jar" ext="jar" m:classifier="tests"/>
