@@ -36,6 +36,8 @@ OPTIMIZATIONS
 
 BUG FIXES
 
+PIG-5318: Unit test failures on Pig on Spark with Spark 2.2 (nkollar via szita)
+
 PIG-5294: Spark unit tests are always run in spark1 mode (szita)
 
 PIG-5277: Spark mode is writing nulls among tuples to the output (workaround) (szita)
