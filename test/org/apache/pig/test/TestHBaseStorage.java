@@ -100,8 +100,7 @@ public class TestHBaseStorage {
         conf = HBaseConfiguration.create(hadoopConf);
 
         util = new HBaseTestingUtility(conf);
-        util.startMiniZKCluster();
-        util.startMiniHBaseCluster(1, 1);
+        util.startMiniCluster();
 
         connection = ConnectionFactory.createConnection(conf);
     }
