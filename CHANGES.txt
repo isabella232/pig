@@ -30,6 +30,8 @@ Release 0.12.1 (unreleased changes)
 
 BUG FIXES
 
+PIG-5325: Schema disambiguation can't be turned off for nested schemas (szita)
+
 PIG-5284: Fix flakyness introduced by PIG-3655 (szita)
 
 PIG-3567: LogicalPlanPrinter throws OOM for large scripts (aniket486)
