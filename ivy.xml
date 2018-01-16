@@ -671,6 +671,7 @@
       <exclude org="com.esotericsoftware.kryo" />
       <exclude org="jline" module="jline"/>
       <exclude org="com.google.guava" />
+      <exclude org="com.fasterxml.jackson.module" module="jackson-module-scala_2.11"/>
     </dependency>
     <dependency org="org.apache.spark" name="spark-yarn_2.11" rev="${spark2.version}" conf="spark2->default">
       <exclude org="org.apache.hadoop" />
