@@ -152,7 +152,6 @@
       <exclude org="org.apache.zookeeper" module="zookeeper" />
       <exclude org="org.apache.curator" module="*" />
       <exclude org="org.apache.hadoop" module="hadoop-auth" />
-      <exclude org="com.fasterxml.jackson.core" module="jackson-databind" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-hdfs"
       rev="${hadoop-hdfs.version}" conf="hadoop2->master;hadoop3->default">
@@ -166,7 +165,6 @@
       <exclude org="org.mortbay.jetty" module="*" />
       <exclude org="com.sun.jersey" module="*" />
       <exclude org="com.sun.jersey.contribs" module="*" />
-      <exclude org="com.fasterxml.jackson.core" module="jackson-databind" />
     </dependency>
     <dependency org="org.apache.hadoop" name="hadoop-mapreduce-client-core" rev="${hadoop-mapreduce.version}"
       conf="hadoop2->master;hadoop3->master">
