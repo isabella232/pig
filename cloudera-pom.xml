@@ -21,13 +21,13 @@
   <parent>
     <groupId>com.cloudera.cdh</groupId>
     <artifactId>pig-root</artifactId>
-    <version>0.12.0-cdh5.13.2-SNAPSHOT</version>
+    <version>0.12.0-cdh5.13.2</version>
     <relativePath>cloudera/maven-packaging/pom.xml</relativePath>
   </parent>
   
   <groupId>com.cloudera.cdh</groupId>
   <artifactId>pig-ant</artifactId>
-  <version>0.12.0-cdh5.13.2-SNAPSHOT</version>
+  <version>0.12.0-cdh5.13.2</version>
   <packaging>pom</packaging>
   
   <scm>
