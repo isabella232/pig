@@ -15,9 +15,10 @@ export CDH_GBN="$(curl "http://builddb.infra.cloudera.com:8080/resolvealias?alia
 # not sure why, but ant and mvn aren't on the path even after sourcing toolchain above...
 export PATH="$PATH:/opt/toolchain/apache-ant-1.8.2/bin:/opt/toolchain/apache-maven-3.0.4/bin"
 
-# Ensure our maven settings file points at the GBN we got above
-curl -L http://github.mtv.cloudera.com/raw/CDH/cdh/${BRANCH_NAME}/gbn-m2-settings.xml > mvn_settings.xml
-mvn -s mvn_settings.xml -f cloudera-pom.xml process-resources -U -B
+# activate mvn-gbn wrapper
+mv "$(which mvn-gbn-wrapper)" "$(dirname "$(which mvn-gbn-wrapper)")/mvn"
+
+mvn -f cloudera-pom.xml process-resources -U -B
 
 #Test Pig
 ant clean jar test-commit -Dhadoopversion=3 -Dtest.junit.output.format=xml
