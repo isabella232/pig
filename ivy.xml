@@ -368,7 +368,7 @@
       conf="compile->master"/>
     <dependency org="org.apache.ivy" name="ivy" rev="${ivy.version}"
       conf="compile->master"/>
-    <dependency org="org.codehaus.jackson" name="jackson-mapper-asl" rev="${jackson.version}"
+    <dependency org="org.codehaus.jackson" name="jackson-mapper-asl" rev="${jackson-mapper-asl.version}"
       conf="compile->master"/>
     <dependency org="org.codehaus.jackson" name="jackson-core-asl" rev="${jackson.version}"
       conf="compile->master"/>
