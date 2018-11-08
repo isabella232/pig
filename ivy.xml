@@ -682,6 +682,9 @@
     <dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="spark1->default;spark2->default"/>
     <dependency org="org.scala-lang.modules" name="scala-xml_2.11" rev="${scala-xml.version}" conf="spark1->default;spark2->default"/>
 
+    <dependency org="org.bouncycastle" name="bcprov-jdk15on" rev="1.60" conf="test->default"/>
+    <dependency org="org.bouncycastle" name="bcpkix-jdk15on" rev="1.60" conf="test->default"/>
+
     <!-- for Tez integration -->
     <dependency org="org.apache.tez" name="tez" rev="${tez.version}"
        conf="hadoop2->master;hadoop3->master"/>
