@@ -510,6 +510,9 @@
     </dependency>
 
     <dependency org="org.mockito" name="mockito-all" rev="${mockito.version}" conf="compile->default"/>
+
+    <dependency org="org.apache.commons" name="commons-collections4" rev="${commons-collections4.version}"
+                conf="hadoop23->master"/>
   </dependencies>
 </ivy-module>
 
