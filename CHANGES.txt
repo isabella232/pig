@@ -30,6 +30,8 @@ Release 0.12.1 (unreleased changes)
 
 BUG FIXES
 
+PIG-5374: Use CircularFifoBuffer in InterRecordReader (szita)
+
 PIG-5373: InterRecordReader might skip records if certain sync markers are used (szita)
 
 PIG-5325: Schema disambiguation can't be turned off for nested schemas (szita)

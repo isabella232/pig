@@ -43,7 +43,6 @@ import java.util.zip.ZipEntry;
 
 import org.antlr.runtime.CommonTokenStream;
 
-import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -112,8 +111,7 @@ public class JarManager {
         GUAVA("com/google/common", Multimaps.class),
         JACKSON_CORE("org/codehaus/jackson", JsonPropertyOrder.class),
         JACKSON_MAPPER("org/codehaus/jackson", JacksonStdImpl.class),
-        JODATIME("org/joda/time", DateTime.class),
-        COMMONSCOLLECTIONS4("org/apache/commons/collections4/queue", CircularFifoQueue.class);
+        JODATIME("org/joda/time", DateTime.class);
 
         private final String pkgPrefix;
         private final Class pkgClass;
