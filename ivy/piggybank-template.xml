@@ -21,7 +21,7 @@
   <groupId>org.apache.pig</groupId>
   <artifactId>piggybank</artifactId>
   <packaging>jar</packaging>
-  <version>0.17.0-cdh6.3.x-SNAPSHOT</version>
+  <version>0.17.0-cdh6.3.0</version>
   <dependencies>
     <dependency>
       <groupId>commons-lang</groupId>

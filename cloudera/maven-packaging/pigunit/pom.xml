@@ -23,13 +23,13 @@
   <parent>
     <groupId>com.cloudera.cdh</groupId>
     <artifactId>pig-root</artifactId>
-    <version>0.17.0-cdh6.3.x-SNAPSHOT</version>
+    <version>0.17.0-cdh6.3.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
   <groupId>org.apache.pig</groupId>
   <artifactId>pigunit</artifactId>
-  <version>0.17.0-cdh6.3.x-SNAPSHOT</version>
+  <version>0.17.0-cdh6.3.0</version>
   <packaging>pom</packaging>
   
   <dependencies>
